@@ -1,0 +1,370 @@
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary: "#1a365d"
+  secondary: "#2b6cb0"
+  accent: "#63b3ed"
+  surface: "#ebf8ff"
+  text: "#1a202c"
+  text-light: "#ffffff"
+  muted: "#a0aec0"
+  danger: "#fc8181"
+}
+
+classes: {
+  control-plane: {
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      font-color: ${text-light}
+      border-radius: 12
+      shadow: true
+      bold: true
+    }
+  }
+  worker: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      border-radius: 8
+      shadow: true
+      multiple: true
+    }
+  }
+  pod: {
+    shape: circle
+    style: {
+      fill: ${accent}
+      stroke: ${secondary}
+      font-color: ${text}
+    }
+  }
+  etcd-node: {
+    shape: cylinder
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      font-color: ${text-light}
+      shadow: true
+    }
+  }
+  service: {
+    shape: cloud
+    style: {
+      fill: ${surface}
+      stroke: ${accent}
+      font-color: ${text}
+      shadow: true
+    }
+  }
+  ingress: {
+    style: {
+      fill: "#fefcbf"
+      stroke: "#d69e2e"
+      font-color: ${text}
+      border-radius: 12
+      bold: true
+    }
+  }
+  network: {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  control-network: {
+    style: {
+      stroke: ${danger}
+      stroke-width: 2
+      stroke-dash: 3
+    }
+  }
+  icon-node: {
+    width: 120
+    height: 80
+    style: {
+      border-radius: 12
+    }
+  }
+  icon-node-large: {
+    width: 140
+    height: 100
+    style: {
+      border-radius: 12
+    }
+  }
+}
+
+internet: Internet {
+  shape: cloud
+  style: {
+    fill: "#edf2f7"
+    stroke: ${muted}
+    font-color: ${text}
+    bold: true
+  }
+}
+
+ingress: Ingress\nController {
+  class: ingress
+  class: icon-node
+  icon: https://icons.terrastruct.com/azure%2FNetworking%20Service%20Color%2FLoad%20Balancers.svg
+}
+
+etcd: etcd Cluster {
+  class: etcd-node
+  style.multiple: true
+  icon: https://icons.terrastruct.com/dev%2Fredis.svg
+  width: 100
+  height: 70
+}
+
+control-plane: Control Plane {
+  class: control-plane
+  
+  api-server: "API Server\n(kube-apiserver)" {
+    icon: https://icons.terrastruct.com/dev%2Fgo.svg
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      font-color: ${text-light}
+      border-radius: 8
+      shadow: true
+    }
+  }
+  
+  scheduler: "Scheduler\n(kube-scheduler)" {
+    icon: https://icons.terrastruct.com/dev%2Fgo.svg
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      font-color: ${text-light}
+      border-radius: 8
+      shadow: true
+    }
+  }
+  
+  controller-mgr: "Controller Mgr\n(kube-controller-manager)" {
+    icon: https://icons.terrastruct.com/dev%2Fpython.svg
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      font-color: ${text-light}
+      border-radius: 8
+      shadow: true
+    }
+  }
+  
+  api-server -> scheduler: Watch {class: control-network}
+  api-server -> controller-mgr: Watch {class: control-network}
+  api-server -> etcd: Persist {class: control-network}
+}
+
+worker-nodes: Worker Nodes {
+  style: {
+    fill: ${surface}
+    stroke: ${muted}
+    border-radius: 16
+    opacity: 0.9
+    font-color: ${text}
+    bold: true
+  }
+  
+  worker-1: "Worker Node 1" {
+    class: worker
+    
+    kubelet-1: Kubelet {
+      style: {
+        fill: ${accent}
+        stroke: ${secondary}
+        font-color: ${text}
+        border-radius: 8
+      }
+    }
+    
+    pod-a: App Pod {
+      class: pod
+      icon: https://icons.terrastruct.com/dev%2Fdocker.svg
+      width: 48
+      height: 48
+    }
+    
+    pod-b: Cache Pod {
+      class: pod
+      icon: https://icons.terrastruct.com/dev%2Fredis.svg
+      width: 48
+      height: 48
+    }
+    
+    cri-1: CRI {
+      style: {
+        fill: "#f0fff4"
+        stroke: "#276749"
+        font-color: ${text}
+        border-radius: 6
+        font-size: 12
+      }
+    }
+    
+    kubelet-1 -> pod-a {class: network}
+    kubelet-1 -> pod-b {class: network}
+    kubelet-1 -> cri-1: Exec {
+      style: {
+        stroke: ${muted}
+        stroke-dash: 3
+      }
+    }
+  }
+  
+  worker-2: "Worker Node 2" {
+    class: worker
+    
+    kubelet-2: Kubelet {
+      style: {
+        fill: ${accent}
+        stroke: ${secondary}
+        font-color: ${text}
+        border-radius: 8
+      }
+    }
+    
+    pod-c: API Pod {
+      class: pod
+      icon: https://icons.terrastruct.com/dev%2Fnodejs.svg
+      width: 48
+      height: 48
+    }
+    
+    pod-d: Sidecar {
+      class: pod
+      icon: https://icons.terrastruct.com/dev%2Fgo.svg
+      width: 48
+      height: 48
+    }
+    
+    cri-2: CRI {
+      style: {
+        fill: "#f0fff4"
+        stroke: "#276749"
+        font-color: ${text}
+        border-radius: 6
+        font-size: 12
+      }
+    }
+    
+    kubelet-2 -> pod-c {class: network}
+    kubelet-2 -> pod-d {class: network}
+    kubelet-2 -> cri-2: Exec {
+      style: {
+        stroke: ${muted}
+        stroke-dash: 3
+      }
+    }
+  }
+  
+  cni: CNI Network\nPlugin {
+    shape: cloud
+    style: {
+      fill: "#fffaf0"
+      stroke: "#c05621"
+      font-color: ${text}
+      border-radius: 12
+    }
+  }
+  
+  cni -> worker-1 {
+    style: {
+      stroke: "#c05621"
+      stroke-dash: 5
+    }
+  }
+  cni -> worker-2 {
+    style: {
+      stroke: "#c05621"
+      stroke-dash: 5
+    }
+  }
+}
+
+app-service: "Service\n(ClusterIP)\napp-service:8080" {
+  class: service
+  class: icon-node
+  icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-API-Gateway.svg
+}
+
+metrics: "Metrics\nServer" {
+  style: {
+    fill: ${surface}
+    stroke: ${accent}
+    font-color: ${text}
+    border-radius: 8
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+  width: 100
+  height: 70
+}
+
+storage: "Persistent\nVolume\n(NFS/EBS)" {
+  shape: cylinder
+  style: {
+    fill: "#faf5ff"
+    stroke: "#6b46c1"
+    font-color: ${text}
+    shadow: true
+    multiple: true
+  }
+  icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  width: 100
+  height: 70
+}
+
+internet -> ingress: HTTPS {class: network}
+ingress -> app-service: HTTP {
+  style: {
+    stroke: ${accent}
+    stroke-width: 2
+    animated: true
+  }
+}
+
+app-service -> worker-nodes.worker-1.pod-a: Load Balance {class: network}
+app-service -> worker-nodes.worker-2.pod-c: Load Balance {class: network}
+
+control-plane.api-server -> worker-nodes.worker-1.kubelet-1: Assign Pod {class: control-network}
+control-plane.api-server -> worker-nodes.worker-2.kubelet-2: Assign Pod {class: control-network}
+
+worker-nodes.worker-1.pod-a -> storage: Read/Write {
+  style: {
+    stroke: ${accent}
+    stroke-dash: 3
+  }
+}
+worker-nodes.worker-2.pod-c -> storage: Read/Write {
+  style: {
+    stroke: ${accent}
+    stroke-dash: 3
+  }
+}
+
+metrics -> worker-nodes: Scrape {
+  style: {
+    stroke: ${muted}
+    stroke-dash: 5
+  }
+}
+
+metrics -> control-plane.api-server: Report {
+  style: {
+    stroke: ${muted}
+    stroke-dash: 5
+  }
+}
+
+etcd -> control-plane: Cluster State {class: control-network}

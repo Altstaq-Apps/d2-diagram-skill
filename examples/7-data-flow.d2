@@ -1,0 +1,196 @@
+# LEVEL: L2 -- Data Flow
+# AUDIENCE: Engineering, data architects
+# COMPLIANCE: none
+# Shows: ETL pipeline from PostgreSQL through Airflow/Spark to Redshift and S3
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary: "#162646"
+  secondary: "#385FAF"
+  accent: "#9CADD7"
+  surface: "#1C2F4A"
+  text: "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted: "#739BCF"
+  orange: "#F5871F"
+}
+
+classes: {
+  sync-connection: {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  async-connection: {
+    style: {
+      stroke: ${accent}
+      stroke-dash: 5
+      animated: true
+      stroke-width: 2
+    }
+  }
+  internal-service: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+      shadow: true
+    }
+  }
+  external-node: {
+    style: {
+      fill: ${surface}
+      stroke: ${orange}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+    }
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    label.near: outside-bottom-center
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      shadow: true
+    }
+  }
+  queue: {
+    shape: queue
+    width: 120
+    height: 70
+    style: {
+      fill: ${surface}
+      stroke: ${muted}
+      font-color: ${text}
+    }
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style: {
+      fill: ${surface}
+      stroke: ${muted}
+      font-color: ${text}
+    }
+  }
+  service-group: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-dash: 3
+      font-color: ${text}
+      border-radius: 8
+      opacity: 0.85
+      bold: true
+    }
+  }
+  data-flow: {
+    style: {
+      stroke: ${accent}
+      stroke-width: 2
+      animated: true
+    }
+  }
+  pipeline-step: {
+    shape: step
+    width: 150
+    height: 60
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      bold: true
+    }
+  }
+}
+
+# --- Source ---
+source: Source Systems {
+  class: service-group
+
+  pg_source: PostgreSQL (OLTP) {
+    class: datastore
+    icon: https://icons.terrastruct.com/dev%2Fpostgresql.svg
+  }
+
+  api_logs: API Event Logs { class: queue }
+
+  csv_feeds: CSV Partner Feeds { class: external-node }
+}
+
+# --- Extract ---
+extract: Extract {
+  class: service-group
+
+  airflow: Airflow Scheduler { class: internal-service }
+  cdc: CDC Connector { class: pipeline-step }
+  file_ingest: File Ingest { class: pipeline-step }
+}
+
+# --- Transform ---
+transform: Transform {
+  class: service-group
+
+  emr: EMR Spark Cluster {
+    class: internal-service
+    style.multiple: true
+  }
+  clean: Data Cleaning { class: pipeline-step }
+  enrich: Enrichment { class: pipeline-step }
+  aggregate: Aggregation { class: pipeline-step }
+}
+
+# --- Load ---
+load: Load {
+  class: service-group
+
+  redshift: Redshift (DWH) {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg
+  }
+
+  s3_lake: S3 Data Lake {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  }
+}
+
+# --- Consumers ---
+bi: BI Dashboards { class: internal-service }
+ds_team: Data Science Team { class: actor }
+
+# --- Connections: Extract ---
+source.pg_source -> extract.cdc: WAL stream { class: data-flow }
+source.api_logs -> extract.airflow: pulls events { class: data-flow }
+source.csv_feeds -> extract.file_ingest: SFTP { class: data-flow }
+extract.airflow -> extract.cdc: orchestrates { class: sync-connection }
+extract.airflow -> extract.file_ingest: orchestrates { class: sync-connection }
+
+# --- Connections: Transform ---
+extract.cdc -> transform.emr: raw records { class: data-flow }
+extract.file_ingest -> transform.emr: raw files { class: data-flow }
+transform.emr -> transform.clean { class: data-flow }
+transform.clean -> transform.enrich { class: data-flow }
+transform.enrich -> transform.aggregate { class: data-flow }
+
+# --- Connections: Load ---
+transform.aggregate -> load.redshift: transformed data { class: data-flow }
+transform.clean -> load.s3_lake: raw + cleaned (parquet) { class: data-flow }
+
+# --- Connections: Consumers ---
+load.redshift -> bi: queries { class: sync-connection }
+load.s3_lake -> ds_team: notebooks { class: sync-connection }

@@ -1,0 +1,227 @@
+# LEVEL: L3 -- Network / Security Topology
+# AUDIENCE: Security engineers, ISSO, FedRAMP auditors
+# COMPLIANCE: FedRAMP High boundary shown
+# Shows: Trust zones, firewall rules, traffic inspection, boundary crossings
+
+direction: down
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary: "#162646"
+  secondary: "#385FAF"
+  accent: "#9CADD7"
+  surface: "#1C2F4A"
+  text: "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted: "#739BCF"
+  orange: "#F5871F"
+}
+
+classes: {
+  sync-connection: {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  internal-service: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+      shadow: true
+    }
+  }
+  external-node: {
+    style: {
+      fill: ${surface}
+      stroke: ${orange}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+    }
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style: {
+      fill: ${surface}
+      stroke: ${muted}
+      font-color: ${text}
+    }
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    label.near: outside-bottom-center
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      shadow: true
+    }
+  }
+  aws-service: {
+    shape: cloud
+    width: 130
+    height: 85
+    style: {
+      fill: ${surface}
+      stroke: ${accent}
+      font-color: ${text}
+    }
+  }
+  service-group: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-dash: 3
+      font-color: ${text}
+      border-radius: 8
+      opacity: 0.85
+      bold: true
+    }
+  }
+  security-boundary: {
+    style: {
+      fill: "transparent"
+      stroke: ${orange}
+      stroke-dash: 6
+      stroke-width: 2
+      font-color: ${orange}
+      border-radius: 4
+      bold: true
+    }
+  }
+  data-flow: {
+    style: {
+      stroke: ${accent}
+      stroke-width: 2
+      animated: true
+    }
+  }
+  monitoring-link: {
+    style: {
+      stroke: "#494C4D"
+      stroke-dash: 3
+      stroke-width: 1
+    }
+  }
+  boundary-crossing: {
+    style: {
+      stroke: ${orange}
+      stroke-width: 2
+      stroke-dash: 2
+    }
+  }
+  firewall: {
+    shape: hexagon
+    width: 100
+    height: 80
+    style: {
+      fill: ${surface}
+      stroke: ${orange}
+      stroke-width: 2
+      font-color: ${text}
+    }
+  }
+  trust-zone: {
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      stroke-width: 2
+      font-color: ${text-light}
+      border-radius: 12
+      bold: true
+    }
+  }
+}
+
+# --- Untrusted ---
+untrusted: Untrusted (Internet) {
+  class: trust-zone
+  style.fill: "#2D1515"
+  style.stroke: ${orange}
+
+  end_user: End User { class: actor }
+  partner: Partner System { class: external-node }
+}
+
+# --- DMZ ---
+dmz: DMZ {
+  class: trust-zone
+  style.fill: "#1A2020"
+  style.stroke: ${muted}
+
+  waf: WAF { class: firewall }
+  alb: ALB { class: internal-service }
+  vpn: VPN Endpoint { class: firewall }
+}
+
+# --- FedRAMP Boundary ---
+fedramp: FedRAMP High Boundary {
+  class: security-boundary
+
+  restricted: Restricted Zone {
+    class: trust-zone
+    api_fw: API Firewall { class: firewall }
+
+    app: Application Tier {
+      class: service-group
+      api_pods: API Pods {
+        class: internal-service
+        style.multiple: true
+      }
+      ingest_pods: Ingest Pods {
+        class: internal-service
+        style.multiple: true
+      }
+    }
+  }
+
+  data: Data Zone {
+    class: trust-zone
+    style.fill: "#0E1829"
+
+    db_fw: DB Firewall { class: firewall }
+    rds: RDS Multi-AZ { class: datastore }
+    s3: S3 GovCloud { class: datastore }
+    elasticache: ElastiCache { class: datastore }
+  }
+}
+
+# --- Management ---
+mgmt: Management Plane {
+  class: trust-zone
+  style.stroke-dash: 4
+
+  cloudwatch: CloudWatch { class: aws-service }
+  guardduty: GuardDuty { class: aws-service }
+  iam: IAM { class: aws-service }
+}
+
+# --- Connections ---
+untrusted.end_user -> dmz.waf: HTTPS :443 { class: boundary-crossing }
+untrusted.partner -> dmz.vpn: IPSec :500 { class: boundary-crossing }
+
+dmz.waf -> dmz.alb: filtered { class: sync-connection }
+dmz.alb -> fedramp.restricted.api_fw: HTTPS :443 { class: boundary-crossing }
+dmz.vpn -> fedramp.restricted.api_fw: routed { class: boundary-crossing }
+
+fedramp.restricted.api_fw -> fedramp.restricted.app.api_pods: :8080 { class: sync-connection }
+fedramp.restricted.app.api_pods -> fedramp.data.db_fw: SQL :5432 { class: sync-connection }
+fedramp.data.db_fw -> fedramp.data.rds { class: sync-connection }
+fedramp.restricted.app.api_pods -> fedramp.data.elasticache: :6379 { class: sync-connection }
+fedramp.restricted.app.ingest_pods -> fedramp.data.s3: HTTPS :443 { class: data-flow }
+
+fedramp -> mgmt.cloudwatch: metrics/logs { class: monitoring-link }
+mgmt.guardduty -> fedramp: threat detection { class: monitoring-link }
+mgmt.iam -> fedramp: policies { class: monitoring-link }

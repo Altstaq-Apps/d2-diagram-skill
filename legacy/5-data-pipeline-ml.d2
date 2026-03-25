@@ -1,0 +1,358 @@
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 301
+    layout-engine: elk
+  }
+  primary: "#1a4731"
+  secondary: "#276749"
+  accent: "#68d391"
+  surface: "#f0fff4"
+  text: "#1a202c"
+  text-light: "#ffffff"
+  muted: "#a0aec0"
+}
+
+classes: {
+  source: {
+    style: {
+      fill: "#fed7d7"
+      stroke: "#c53030"
+      font-color: "#7b341e"
+      border-radius: 8
+      bold: true
+    }
+  }
+  ingestion: {
+    shape: step
+    style: {
+      fill: ${secondary}
+      font-color: ${text-light}
+      bold: true
+      shadow: true
+    }
+  }
+  processing: {
+    shape: hexagon
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      bold: true
+      shadow: true
+    }
+  }
+  storage: {
+    shape: cylinder
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      shadow: true
+    }
+  }
+  ml-stage: {
+    style: {
+      fill: "#c6f6d5"
+      stroke: "#276749"
+      font-color: "#1a4731"
+      border-radius: 12
+      shadow: true
+      bold: true
+    }
+  }
+  monitoring: {
+    style: {
+      fill: "#fefcbf"
+      stroke: "#d69e2e"
+      font-color: ${text}
+      border-radius: 8
+      shadow: true
+    }
+  }
+}
+
+web-events: Web Events {
+  class: source
+  icon: https://icons.terrastruct.com/dev%2Fnodejs.svg
+}
+
+database-updates: Database Updates {
+  class: source
+  icon: https://icons.terrastruct.com/dev%2Fpostgresql.svg
+}
+
+api-logs: API Logs {
+  class: source
+  icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-API-Gateway.svg
+}
+
+kafka: "Kafka Topics\n(Event streaming)" {
+  class: ingestion
+  icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Managed-Streaming-for-Kafka.svg
+}
+
+raw-data-lake: Raw Data Lake {
+  class: storage
+  icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+}
+
+spark-etl: "Spark ETL\n(Data cleaning & transformation)" {
+  class: processing
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+}
+
+validation: Data Validation {
+  shape: diamond
+  style: {
+    fill: "#fefcbf"
+    stroke: "#d69e2e"
+    font-color: ${text}
+    bold: true
+  }
+}
+
+quality-check: "Quality Metrics\n(Schema, nulls, dupes)" {
+  class: monitoring
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+}
+
+processed-data-lake: Processed Data Lake {
+  class: storage
+  icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+}
+
+feature-engineering: "Feature Engineering\n(Spark ML)" {
+  class: processing
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+}
+
+feature-store: "Feature Store\n(Time-series features)" {
+  class: storage
+  style.multiple: true
+  icon: https://icons.terrastruct.com/dev%2Fredis.svg
+}
+
+ml-training: "ML Training Pipeline\n(XGBoost, TensorFlow)" {
+  class: ml-stage
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+}
+
+model-registry: "Model Registry" {
+  shape: package
+  style: {
+    fill: "#c6f6d5"
+    stroke: "#276749"
+    font-color: "#1a4731"
+    border-radius: 8
+    shadow: true
+    bold: true
+  }
+  icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+}
+
+model-validation: "Model Validation\n(A/B testing, holdout set)" {
+  shape: diamond
+  style: {
+    fill: "#c6f6d5"
+    stroke: "#276749"
+    font-color: "#1a4731"
+    bold: true
+  }
+}
+
+inference-service: "Inference Service\n(Model serving)" {
+  class: ml-stage
+  icon: https://icons.terrastruct.com/dev%2Fnodejs.svg
+}
+
+online-cache: "Online Feature Cache\n(Real-time predictions)" {
+  class: storage
+  icon: https://icons.terrastruct.com/dev%2Fredis.svg
+}
+
+predictions-db: "Predictions DB" {
+  class: storage
+  icon: https://icons.terrastruct.com/dev%2Fmongodb.svg
+}
+
+monitoring: ML Monitoring {
+  class: monitoring
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+}
+
+drift-detection: "Model Drift Detection\n(Feature & prediction drift)" {
+  class: monitoring
+}
+
+retraining-trigger: Trigger Retraining {
+  shape: oval
+  style: {
+    fill: "#fefcbf"
+    stroke: "#d69e2e"
+    font-color: ${text}
+    bold: true
+  }
+}
+
+web-events -> kafka {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+    animated: true
+  }
+}
+
+database-updates -> kafka {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+    animated: true
+  }
+}
+
+api-logs -> kafka {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+    animated: true
+  }
+}
+
+kafka -> raw-data-lake {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+    animated: true
+  }
+}
+
+raw-data-lake -> spark-etl {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+spark-etl -> validation {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+validation -> quality-check: Check {
+  style: {
+    stroke: "#d69e2e"
+    stroke-dash: 3
+  }
+}
+
+validation -> processed-data-lake: Pass {
+  style: {
+    stroke: "#276749"
+    stroke-width: 2
+  }
+}
+
+processed-data-lake -> feature-engineering {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+feature-engineering -> feature-store {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+    animated: true
+  }
+}
+
+feature-store -> ml-training {
+  style: {
+    stroke: "#276749"
+    stroke-width: 2
+  }
+}
+
+ml-training -> model-registry {
+  style: {
+    stroke: "#276749"
+    stroke-width: 2
+  }
+}
+
+model-registry -> model-validation {
+  style: {
+    stroke: "#276749"
+    stroke-width: 2
+  }
+}
+
+model-validation -> inference-service: Approved {
+  style: {
+    stroke: "#276749"
+    stroke-width: 2
+  }
+}
+
+model-validation -> retraining-trigger: Failed {
+  style: {
+    stroke: "#c53030"
+    stroke-dash: 5
+  }
+}
+
+inference-service -> online-cache {
+  style: {
+    stroke: "#276749"
+    stroke-dash: 3
+  }
+}
+
+inference-service -> predictions-db {
+  style: {
+    stroke: "#276749"
+    stroke-dash: 3
+  }
+}
+
+predictions-db -> monitoring {
+  style: {
+    stroke: "#d69e2e"
+    stroke-dash: 5
+  }
+}
+
+monitoring -> drift-detection {
+  style: {
+    stroke: "#d69e2e"
+    stroke-dash: 3
+  }
+}
+
+drift-detection -> retraining-trigger: Drift detected {
+  style: {
+    stroke: "#c53030"
+    stroke-dash: 5
+    animated: true
+  }
+}
+
+retraining-trigger -> ml-training: Retrain {
+  style: {
+    stroke: "#c53030"
+    stroke-dash: 5
+  }
+}
+
+quality-check -> retraining-trigger: Quality fail {
+  style: {
+    stroke: "#c53030"
+    stroke-dash: 5
+  }
+}

@@ -1,0 +1,92 @@
+# LEVEL: L2 -- Sequence Diagram
+# AUDIENCE: Developers, technical reviewers
+# COMPLIANCE: none
+# Shows: OAuth2 login flow with Auth0, session storage, and error handling
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+  }
+  secondary: "#385FAF"; accent: "#9CADD7"; orange: "#F5871F"
+  surface: "#1C2F4A"; text: "#D6D6DA"; muted: "#739BCF"
+  success: "#4CAF80"; danger: "#E24B4A"
+}
+
+shape: sequence_diagram
+
+# --- Participants ---
+browser: Browser {
+  style: { fill: ${surface}; stroke: ${orange}; font-color: ${text}; bold: true }
+}
+nextjs: Next.js App {
+  style: { fill: ${surface}; stroke: ${secondary}; font-color: ${text}; bold: true }
+}
+auth0: Auth0 {
+  style: { fill: ${surface}; stroke: ${accent}; font-color: ${text}; bold: true }
+}
+api: Backend API {
+  style: { fill: ${surface}; stroke: ${secondary}; font-color: ${text}; bold: true }
+}
+redis: Redis Session Store {
+  style: { fill: ${surface}; stroke: ${muted}; font-color: ${text}; bold: true }
+}
+
+# --- Login initiation ---
+browser -> nextjs: "GET /login" {
+  style.bold: true
+}
+nextjs -> browser: "302 Redirect to Auth0\n/authorize?client_id=..." {
+  style.stroke: ${secondary}
+}
+
+# --- Auth0 authentication ---
+browser -> auth0: "GET /authorize\nuser authenticates" {
+  style.stroke: ${accent}
+}
+auth0 -> browser: "302 Callback\n/callback?code=AUTH_CODE" {
+  style.stroke: ${success}
+}
+
+# --- Token exchange ---
+browser -> nextjs: "GET /callback?code=AUTH_CODE" {
+  style.bold: true
+}
+nextjs -> auth0: "POST /oauth/token\n{code, client_secret}" {
+  style.stroke: ${secondary}
+}
+auth0 -> nextjs: "200 OK\n{access_token, id_token, refresh_token}" {
+  style.stroke: ${success}
+}
+
+# --- Session creation ---
+nextjs -> api: "POST /session\nAuthorization: Bearer access_token" {
+  style.stroke: ${secondary}
+}
+api -> redis: "SET session:{id}\nTTL: 24h" {
+  style.stroke: ${muted}
+}
+redis -> api: "OK" {
+  style.stroke: ${success}
+}
+api -> nextjs: "200 OK {session_id}" {
+  style.stroke: ${success}
+}
+nextjs -> browser: "200 OK\nSet-Cookie: session={id}; HttpOnly; Secure" {
+  style.stroke: ${success}
+  style.bold: true
+}
+
+# --- Error path ---
+browser -> nextjs: "GET /login (expired session)" {
+  style.stroke: ${danger}
+}
+nextjs -> auth0: "POST /oauth/token (invalid refresh)" {
+  style.stroke: ${danger}
+}
+auth0 -> nextjs: "401 Unauthorized" {
+  style.stroke: ${danger}
+}
+nextjs -> browser: "302 Redirect to /login" {
+  style.stroke: ${danger}
+}

@@ -1,0 +1,429 @@
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 301
+    layout-engine: elk
+  }
+  primary: "#1a4731"
+  secondary: "#276749"
+  accent: "#68d391"
+  surface: "#f0fff4"
+  text: "#1a202c"
+  text-light: "#ffffff"
+  muted: "#a0aec0"
+}
+
+classes: {
+  node: {
+    shape: hexagon
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      bold: true
+      shadow: true
+    }
+  }
+  chain: {
+    style: {
+      fill: "#c6f6d5"
+      stroke: "#276749"
+      font-color: "#1a4731"
+      border-radius: 8
+      bold: true
+      shadow: true
+    }
+  }
+  transaction: {
+    shape: diamond
+    style: {
+      fill: ${accent}
+      stroke: ${secondary}
+      font-color: ${text}
+      bold: true
+    }
+  }
+  consensus: {
+    shape: step
+    style: {
+      fill: ${secondary}
+      font-color: ${text-light}
+      bold: true
+      shadow: true
+    }
+  }
+  contract: {
+    shape: package
+    style: {
+      fill: "#fef08a"
+      stroke: "#ca8a04"
+      font-color: ${text}
+      border-radius: 8
+      bold: true
+    }
+  }
+  validator: {
+    shape: circle
+    style: {
+      fill: "#fed7d7"
+      stroke: "#c53030"
+      font-color: "#7b341e"
+    }
+  }
+  ledger: {
+    shape: cylinder
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      shadow: true
+      multiple: true
+    }
+  }
+  p2p: {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+      animated: true
+    }
+  }
+}
+
+client: User/Client {
+  shape: person
+  style: {
+    fill: ${primary}
+    font-color: ${text-light}
+  }
+}
+
+wallet: "Digital Wallet" {
+  style: {
+    fill: ${surface}
+    stroke: ${secondary}
+    font-color: ${text}
+    border-radius: 8
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+}
+
+mempool: Transaction Mempool {
+  shape: queue
+  style: {
+    fill: "#fefcbf"
+    stroke: "#d69e2e"
+    font-color: ${text}
+  }
+}
+
+nodes: "P2P Network (10k+ Nodes)" {
+  style: {
+    fill: ${surface}
+    stroke: ${muted}
+    border-radius: 16
+    opacity: 0.9
+    font-color: ${text}
+    bold: true
+  }
+  
+  node-1: "Full Node 1" {
+    class: node
+    icon: https://icons.terrastruct.com/dev%2Fgo.svg
+  }
+  
+  node-2: "Full Node 2" {
+    class: node
+    icon: https://icons.terrastruct.com/dev%2Fgo.svg
+  }
+  
+  node-3: "Full Node 3" {
+    class: node
+    icon: https://icons.terrastruct.com/dev%2Fgo.svg
+  }
+  
+  validator-1: "Validator 1\n(Stake: 32 ETH)" {
+    class: validator
+  }
+  
+  validator-2: "Validator 2\n(Stake: 32 ETH)" {
+    class: validator
+  }
+  
+  validator-3: "Validator 3\n(Stake: 32 ETH)" {
+    class: validator
+  }
+  
+  node-1 <- node-2: P2P Gossip {class: p2p}
+  node-2 <- node-3: P2P Gossip {class: p2p}
+  node-3 <- node-1: P2P Gossip {class: p2p}
+  
+  validator-1 -> node-1: Run {
+    style: {
+      stroke: "#c53030"
+      stroke-dash: 3
+    }
+  }
+  validator-2 -> node-2: Run {
+    style: {
+      stroke: "#c53030"
+      stroke-dash: 3
+    }
+  }
+  validator-3 -> node-3: Run {
+    style: {
+      stroke: "#c53030"
+      stroke-dash: 3
+    }
+  }
+}
+
+consensus-layer: "Consensus Layer\n(Proof of Stake)" {
+  class: consensus
+  icon: https://icons.terrastruct.com/dev%2Fgo.svg
+}
+
+execution-layer: "Execution Layer\n(EVM)" {
+  class: consensus
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+}
+
+state-trie: "State Trie\n(MPT)" {
+  class: ledger
+}
+
+account-data: "Account State\n(balance, nonce)" {
+  style: {
+    fill: "#c6f6d5"
+    stroke: "#276749"
+    font-color: "#1a4731"
+    border-radius: 6
+    font-size: 11
+  }
+}
+
+smart-contracts: Smart Contracts {
+  style: {
+    fill: ${surface}
+    stroke: ${muted}
+    border-radius: 12
+    opacity: 0.9
+    font-color: ${text}
+    bold: true
+  }
+  
+  contract-a: "ERC-20 Token\n(USDC)" {
+    class: contract
+    icon: https://icons.terrastruct.com/dev%2Fgo.svg
+  }
+  
+  contract-b: "Uniswap\nExchange" {
+    class: contract
+    icon: https://icons.terrastruct.com/dev%2Fpython.svg
+  }
+  
+  contract-c: "Lending\nProtocol" {
+    class: contract
+    icon: https://icons.terrastruct.com/dev%2Fgo.svg
+  }
+}
+
+merkle-tree: "Merkle Tree\n(block hash)" {
+  class: ledger
+  icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+}
+
+blockchain: Blockchain (Immutable Log) {
+  class: chain
+  
+  genesis-block: "Block 0\n(Genesis)" {
+    style: {
+      fill: "#c6f6d5"
+      stroke: "#276749"
+      font-color: "#1a4731"
+      border-radius: 6
+      font-size: 11
+    }
+  }
+  
+  block-n: "Block N\n(current)" {
+    style: {
+      fill: "#c6f6d5"
+      stroke: "#276749"
+      font-color: "#1a4731"
+      border-radius: 6
+      font-size: 11
+    }
+  }
+  
+  block-n1: "Block N+1\n(pending)" {
+    style: {
+      fill: "#fefcbf"
+      stroke: "#d69e2e"
+      font-color: ${text}
+      border-radius: 6
+      font-size: 11
+    }
+  }
+  
+  genesis-block -> block-n: Chain links {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  
+  block-n -> block-n1: Next block {
+    style: {
+      stroke: "#fbbf24"
+      stroke-width: 2
+      stroke-dash: 3
+    }
+  }
+}
+
+block-proposer: "Block Proposer\n(randomly selected)" {
+  shape: oval
+  style: {
+    fill: "#fef08a"
+    stroke: "#ca8a04"
+    font-color: ${text}
+    bold: true
+  }
+}
+
+attestations: "Attestations\n(66% required)" {
+  shape: oval
+  style: {
+    fill: "#c6f6d5"
+    stroke: "#276749"
+    font-color: "#1a4731"
+    bold: true
+  }
+}
+
+finalization: "Finalization\n(irreversible)" {
+  shape: oval
+  style: {
+    fill: "#c6f6d5"
+    stroke: "#276749"
+    font-color: "#1a4731"
+    bold: true
+  }
+}
+
+monitor: "Block Explorer\n(Etherscan)" {
+  style: {
+    fill: "#fed7d7"
+    stroke: "#c53030"
+    font-color: "#7b341e"
+    border-radius: 8
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+}
+
+client -> wallet {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+wallet -> mempool: "Submit Tx\n(signed)" {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+mempool -> nodes: "Propagate\n(P2P)" {
+  class: p2p
+}
+
+nodes -> consensus-layer: "Tx pool\n-> pending block" {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+consensus-layer -> block-proposer {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+block-proposer -> execution-layer: Propose block {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+execution-layer -> smart-contracts: Execute txs {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+smart-contracts -> state-trie: Update state {
+  style: {
+    stroke: ${secondary}
+    stroke-dash: 3
+  }
+}
+
+state-trie -> account-data {
+  style: {
+    stroke: ${secondary}
+    stroke-dash: 3
+  }
+}
+
+execution-layer -> merkle-tree: Compute hash {
+  style: {
+    stroke: ${secondary}
+    stroke-dash: 3
+  }
+}
+
+merkle-tree -> blockchain.block-n1 {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+blockchain.block-n1 -> attestations {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+attestations -> finalization {
+  style: {
+    stroke: "#276749"
+    stroke-width: 2
+    animated: true
+  }
+}
+
+finalization -> blockchain.block-n: Confirmed {
+  style: {
+    stroke: "#276749"
+    stroke-width: 2
+  }
+}
+
+blockchain -> monitor {
+  style: {
+    stroke: ${muted}
+    stroke-dash: 5
+  }
+}

@@ -1,0 +1,182 @@
+# LEVEL: L2 -- Architecture Overview
+# AUDIENCE: Engineering leads
+# COMPLIANCE: none
+# Shows: React + Node.js web app with CloudFront, ALB, RDS, ElastiCache, S3
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary: "#162646"
+  secondary: "#385FAF"
+  accent: "#9CADD7"
+  surface: "#1C2F4A"
+  text: "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted: "#739BCF"
+  orange: "#F5871F"
+}
+
+classes: {
+  sync-connection: {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  async-connection: {
+    style: {
+      stroke: ${accent}
+      stroke-dash: 5
+      animated: true
+      stroke-width: 2
+    }
+  }
+  internal-service: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+      shadow: true
+    }
+  }
+  external-node: {
+    style: {
+      fill: ${surface}
+      stroke: ${orange}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+    }
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    label.near: outside-bottom-center
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      shadow: true
+    }
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style: {
+      fill: ${surface}
+      stroke: ${muted}
+      font-color: ${text}
+    }
+  }
+  vpc-container: {
+    style: {
+      fill: "#0E1829"
+      stroke: ${muted}
+      stroke-dash: 4
+      font-color: ${muted}
+      border-radius: 12
+      opacity: 0.9
+      bold: true
+    }
+  }
+  service-group: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-dash: 3
+      font-color: ${text}
+      border-radius: 8
+      opacity: 0.85
+      bold: true
+    }
+  }
+  data-flow: {
+    style: {
+      stroke: ${accent}
+      stroke-width: 2
+      animated: true
+    }
+  }
+}
+
+# --- External ---
+users: Users { class: actor }
+
+# --- CDN ---
+cdn: CloudFront {
+  class: internal-service
+  icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-CloudFront.svg
+}
+
+s3_static: S3 Static Assets {
+  class: internal-service
+  icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+}
+
+# --- VPC ---
+vpc: Production VPC {
+  class: vpc-container
+
+  public: Public Subnet {
+    class: service-group
+
+    alb: ALB {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FElastic-Load-Balancing.svg
+    }
+  }
+
+  private: Private Subnet {
+    class: service-group
+
+    api: Node.js API {
+      class: internal-service
+      icon: https://icons.terrastruct.com/dev%2Fnodejs.svg
+      style.multiple: true
+    }
+
+    worker: Background Workers {
+      class: internal-service
+      icon: https://icons.terrastruct.com/dev%2Fnodejs.svg
+    }
+  }
+
+  data: Data Tier {
+    class: service-group
+
+    rds: PostgreSQL RDS {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg
+    }
+
+    cache: ElastiCache Redis {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-ElastiCache.svg
+    }
+  }
+}
+
+s3_uploads: S3 User Uploads {
+  class: internal-service
+  icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+}
+
+# --- Connections ---
+users -> cdn: HTTPS { class: sync-connection }
+cdn -> s3_static: static files { class: sync-connection }
+cdn -> vpc.public.alb: API requests { class: sync-connection }
+vpc.public.alb -> vpc.private.api: routes { class: sync-connection }
+vpc.private.api -> vpc.data.rds: queries { class: sync-connection }
+vpc.private.api -> vpc.data.cache: session/cache { class: async-connection }
+vpc.private.api -> s3_uploads: stores uploads { class: data-flow }
+vpc.private.worker -> vpc.data.rds: background jobs { class: sync-connection }
+vpc.private.api -> vpc.private.worker: enqueues { class: async-connection }

@@ -1,0 +1,365 @@
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary: "#7b341e"
+  secondary: "#c05621"
+  accent: "#f6ad55"
+  surface: "#fffaf0"
+  text: "#1a202c"
+  text-light: "#ffffff"
+  muted: "#a0aec0"
+}
+
+classes: {
+  command: {
+    style: {
+      fill: "#fefcbf"
+      stroke: "#d69e2e"
+      font-color: ${text}
+      border-radius: 12
+      bold: true
+    }
+  }
+  event: {
+    shape: diamond
+    style: {
+      fill: ${accent}
+      stroke: ${secondary}
+      font-color: ${text}
+      bold: true
+    }
+  }
+  aggregate: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      border-radius: 12
+      shadow: true
+    }
+  }
+  projection: {
+    style: {
+      fill: "#c6f6d5"
+      stroke: "#276749"
+      font-color: "#1a4731"
+      border-radius: 12
+      shadow: true
+    }
+  }
+  store: {
+    shape: cylinder
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      shadow: true
+    }
+  }
+  async-flow: {
+    style: {
+      stroke: ${secondary}
+      stroke-dash: 5
+      stroke-width: 2
+      animated: true
+    }
+  }
+  icon-node: {
+    width: 100
+    height: 70
+    style: {
+      border-radius: 12
+    }
+  }
+}
+
+client: Client {
+  shape: person
+  width: 64
+  height: 66
+  style: {
+    fill: ${primary}
+    font-color: ${text-light}
+  }
+}
+
+command-bus: Command Bus {
+  class: command
+  icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Queue-Service-SQS.svg
+  width: 120
+  height: 80
+}
+
+write-side: Write Model {
+  class: aggregate
+  
+  commands: Commands {
+    class: command
+    style.font-size: 12
+  }
+  
+  cmd-create: CreateOrder {
+    class: event
+    style.font-size: 11
+  }
+  
+  cmd-update: UpdateInventory {
+    class: event
+    style.font-size: 11
+  }
+  
+  commands -> cmd-create {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  commands -> cmd-update {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  
+  aggregate-root: OrderAggregate {
+    style: {
+      fill: "#fed7d7"
+      stroke: "#c53030"
+      font-color: "#7b341e"
+      border-radius: 8
+      bold: true
+    }
+  }
+  
+  cmd-create -> aggregate-root: Validate {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  cmd-update -> aggregate-root {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+}
+
+event-store: "Event\nStore" {
+  class: store
+  icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-DynamoDB.svg
+  class: icon-node
+  
+  events-list: "Events\n(Immutable Log)" {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      border-radius: 6
+      font-size: 11
+    }
+  }
+}
+
+event-bus: Event Bus {
+  class: command
+  icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Notification-Service-SNS.svg
+  width: 120
+  height: 80
+}
+
+read-side: Read Model (Query Side) {
+  style: {
+    fill: "#edf2f7"
+    stroke: ${muted}
+    border-radius: 16
+    opacity: 0.9
+    font-color: ${text}
+    bold: true
+  }
+  
+  projection-1: "Order\nProjection" {
+    class: projection
+    icon: https://icons.terrastruct.com/dev%2Fpostgresql.svg
+    width: 100
+    height: 70
+    
+    proj1-db: "order_summary\ntable" {
+      style: {
+        fill: "#c6f6d5"
+        stroke: "#276749"
+        font-color: "#1a4731"
+        border-radius: 6
+        font-size: 11
+      }
+    }
+  }
+  
+  projection-2: "Inventory\nProjection" {
+    class: projection
+    icon: https://icons.terrastruct.com/dev%2Fmongodb.svg
+    width: 100
+    height: 70
+    
+    proj2-db: "inventory_view\ncollection" {
+      style: {
+        fill: "#c6f6d5"
+        stroke: "#276749"
+        font-color: "#1a4731"
+        border-radius: 6
+        font-size: 11
+      }
+    }
+  }
+  
+  projection-3: "Analytics\nProjection" {
+    class: projection
+    icon: https://icons.terrastruct.com/dev%2Fredis.svg
+    width: 100
+    height: 70
+    
+    proj3-db: "analytics\ncache" {
+      style: {
+        fill: "#c6f6d5"
+        stroke: "#276749"
+        font-color: "#1a4731"
+        border-radius: 6
+        font-size: 11
+      }
+    }
+  }
+}
+
+query-handler: "Query\nHandler" {
+  style: {
+    fill: ${surface}
+    stroke: ${secondary}
+    font-color: ${text}
+    border-radius: 12
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/dev%2Fnodejs.svg
+  width: 100
+  height: 70
+}
+
+response: "Fast Read Response\n(eventual\nconsistency)" {
+  shape: oval
+  style: {
+    fill: "#c6f6d5"
+    stroke: "#276749"
+    font-color: "#1a4731"
+    bold: true
+  }
+}
+
+snapshot: "Event\nSnapshots" {
+  class: store
+  icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  width: 100
+  height: 70
+}
+
+saga: "Saga\nOrchestrator" {
+  style: {
+    fill: "#faf5ff"
+    stroke: "#6b46c1"
+    font-color: ${text}
+    border-radius: 12
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/dev%2Fgo.svg
+  width: 100
+  height: 70
+}
+
+client -> command-bus {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+    bold: true
+  }
+}
+
+command-bus -> write-side {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+write-side.aggregate-root -> event-store {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+event-store -> event-bus: Emit Events {class: async-flow}
+
+event-bus -> read-side.projection-1 {class: async-flow}
+event-bus -> read-side.projection-2 {class: async-flow}
+event-bus -> read-side.projection-3 {class: async-flow}
+
+event-bus -> saga: Trigger {class: async-flow}
+
+read-side.projection-1.proj1-db <- read-side.projection-1 {
+  style: {
+    stroke: ${secondary}
+    stroke-dash: 3
+  }
+}
+read-side.projection-2.proj2-db <- read-side.projection-2 {
+  style: {
+    stroke: ${secondary}
+    stroke-dash: 3
+  }
+}
+read-side.projection-3.proj3-db <- read-side.projection-3 {
+  style: {
+    stroke: ${secondary}
+    stroke-dash: 3
+  }
+}
+
+client -> query-handler {
+  style: {
+    stroke: "#276749"
+    stroke-width: 2
+    bold: true
+  }
+}
+
+query-handler -> read-side {
+  style: {
+    stroke: "#276749"
+    stroke-dash: 3
+  }
+}
+
+query-handler -> response {
+  style: {
+    stroke: "#276749"
+    stroke-width: 2
+  }
+}
+
+event-store -> snapshot: Periodic snapshots {
+  style: {
+    stroke: ${muted}
+    stroke-dash: 5
+  }
+}
+
+saga -> event-bus: Compensating\ntransactions {
+  style: {
+    stroke: "#fc8181"
+    stroke-dash: 5
+    stroke-width: 2
+  }
+}

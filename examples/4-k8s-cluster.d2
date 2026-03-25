@@ -1,0 +1,229 @@
+# LEVEL: L2 -- Kubernetes Topology
+# AUDIENCE: Engineering leads, platform team
+# COMPLIANCE: none
+# Shows: K8s cluster with 3 namespaces, ingress, deployments, statefulsets, PVs
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary: "#162646"
+  secondary: "#385FAF"
+  accent: "#9CADD7"
+  surface: "#1C2F4A"
+  text: "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted: "#739BCF"
+  orange: "#F5871F"
+}
+
+classes: {
+  sync-connection: {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  async-connection: {
+    style: {
+      stroke: ${accent}
+      stroke-dash: 5
+      animated: true
+      stroke-width: 2
+    }
+  }
+  internal-service: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+      shadow: true
+    }
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    label.near: outside-bottom-center
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      shadow: true
+    }
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style: {
+      fill: ${surface}
+      stroke: ${muted}
+      font-color: ${text}
+    }
+  }
+  account-boundary: {
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      stroke-width: 2
+      font-color: ${text-light}
+      border-radius: 16
+      opacity: 0.95
+      bold: true
+    }
+  }
+  service-group: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-dash: 3
+      font-color: ${text}
+      border-radius: 8
+      opacity: 0.85
+      bold: true
+    }
+  }
+  data-flow: {
+    style: {
+      stroke: ${accent}
+      stroke-width: 2
+      animated: true
+    }
+  }
+  monitoring-link: {
+    style: {
+      stroke: "#494C4D"
+      stroke-dash: 3
+      stroke-width: 1
+    }
+  }
+  k8s-deployment: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      border-radius: 8
+      shadow: true
+      multiple: true
+    }
+  }
+  k8s-statefulset: {
+    shape: cylinder
+    style: {
+      fill: ${surface}
+      stroke: ${accent}
+      font-color: ${text}
+      shadow: true
+      multiple: true
+    }
+  }
+  k8s-svc: {
+    style: {
+      fill: "#0E1829"
+      stroke: ${muted}
+      font-color: ${text}
+      border-radius: 6
+      bold: true
+    }
+  }
+  k8s-pv: {
+    shape: cylinder
+    style: {
+      fill: ${surface}
+      stroke: ${orange}
+      font-color: ${text}
+      shadow: true
+    }
+  }
+}
+
+# --- External ---
+users: Users { class: actor }
+
+# --- Cluster ---
+cluster: K8s Cluster {
+  class: account-boundary
+  icon: https://icons.terrastruct.com/azure%2F_Companies%2FKubernetes.svg
+
+  ingress: Nginx Ingress {
+    icon: https://icons.terrastruct.com/dev%2Fnginx.svg
+    class: internal-service
+    style: {
+      fill: ${primary}
+      font-color: ${text-light}
+      bold: true
+    }
+  }
+
+  ns-frontend: frontend namespace {
+    class: service-group
+    style.fill: "#162646"
+
+    svc-web: web-svc { class: k8s-svc }
+    deploy-web: React App (3 replicas) {
+      icon: https://icons.terrastruct.com/dev%2Freact.svg
+      class: k8s-deployment
+    }
+    svc-web -> deploy-web { class: sync-connection }
+  }
+
+  ns-backend: backend namespace {
+    class: service-group
+    style.fill: "#0E1829"
+
+    svc-api: api-svc { class: k8s-svc }
+    deploy-api: Go API (5 replicas) {
+      icon: https://icons.terrastruct.com/dev%2Fgo.svg
+      class: k8s-deployment
+    }
+
+    svc-redis: redis-svc { class: k8s-svc }
+    sts-redis: Redis StatefulSet {
+      icon: https://icons.terrastruct.com/dev%2Fredis.svg
+      class: k8s-statefulset
+    }
+
+    svc-pg: postgres-svc { class: k8s-svc }
+    sts-pg: PostgreSQL StatefulSet {
+      icon: https://icons.terrastruct.com/dev%2Fpostgresql.svg
+      class: k8s-statefulset
+    }
+
+    svc-api -> deploy-api { class: sync-connection }
+    svc-redis -> sts-redis { class: sync-connection }
+    svc-pg -> sts-pg { class: sync-connection }
+  }
+
+  ns-monitoring: monitoring namespace {
+    class: service-group
+    style.fill: "#162646"
+
+    prometheus: Prometheus { class: internal-service }
+    grafana: Grafana { class: internal-service }
+    prometheus -> grafana: metrics { class: sync-connection }
+  }
+
+  pv-pg: PV PostgreSQL (50Gi) { class: k8s-pv }
+  pv-redis: PV Redis (10Gi) { class: k8s-pv }
+
+  ingress -> ns-frontend.svc-web: "/*.html" { class: sync-connection }
+  ingress -> ns-backend.svc-api: "/api/*" { class: sync-connection }
+
+  ns-backend.deploy-api -> ns-backend.svc-redis: cache { class: async-connection }
+  ns-backend.deploy-api -> ns-backend.svc-pg: SQL { class: sync-connection }
+
+  ns-backend.sts-pg -> pv-pg: PVC { class: data-flow }
+  ns-backend.sts-redis -> pv-redis: PVC { class: data-flow }
+
+  ns-monitoring.prometheus -> ns-backend.deploy-api: scrape { class: monitoring-link }
+  ns-monitoring.prometheus -> ns-frontend.deploy-web: scrape { class: monitoring-link }
+}
+
+users -> cluster.ingress: HTTPS { class: data-flow }

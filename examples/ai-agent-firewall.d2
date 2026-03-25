@@ -1,0 +1,388 @@
+# LEVEL: L2 -- Architecture Overview
+# AUDIENCE: Security engineers, AI platform leads
+# COMPLIANCE: none
+# Shows: AI Agent Firewall — inspection layers between users and AI models
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary: "#162646"
+  secondary: "#385FAF"
+  accent: "#9CADD7"
+  surface: "#1C2F4A"
+  text: "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted: "#739BCF"
+  orange: "#F5871F"
+  success: "#4CAF80"
+  danger: "#E24B4A"
+}
+
+classes: {
+  sync-connection: {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  async-connection: {
+    style: {
+      stroke: ${accent}
+      stroke-dash: 5
+      animated: true
+      stroke-width: 2
+    }
+  }
+  critical-path: {
+    style: {
+      stroke: ${orange}
+      stroke-width: 3
+      bold: true
+    }
+  }
+  internal-service: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+      shadow: true
+    }
+  }
+  external-node: {
+    style: {
+      fill: ${surface}
+      stroke: ${orange}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+    }
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    label.near: outside-bottom-center
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      shadow: true
+    }
+  }
+  queue: {
+    shape: queue
+    width: 120
+    height: 70
+    style: {
+      fill: ${surface}
+      stroke: ${muted}
+      font-color: ${text}
+    }
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style: {
+      fill: ${surface}
+      stroke: ${muted}
+      font-color: ${text}
+    }
+  }
+  account-boundary: {
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      stroke-width: 2
+      font-color: ${text-light}
+      border-radius: 16
+      opacity: 0.95
+      bold: true
+    }
+  }
+  service-group: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-dash: 3
+      font-color: ${text}
+      border-radius: 8
+      opacity: 0.85
+      bold: true
+    }
+  }
+  security-boundary: {
+    style: {
+      fill: "transparent"
+      stroke: ${orange}
+      stroke-dash: 6
+      stroke-width: 2
+      font-color: ${orange}
+      border-radius: 4
+      bold: true
+    }
+  }
+  data-flow: {
+    style: {
+      stroke: ${accent}
+      stroke-width: 2
+      animated: true
+    }
+  }
+  monitoring-link: {
+    style: {
+      stroke: "#494C4D"
+      stroke-dash: 3
+      stroke-width: 1
+    }
+  }
+  boundary-crossing: {
+    style: {
+      stroke: ${orange}
+      stroke-width: 2
+      stroke-dash: 2
+    }
+  }
+
+  # --- Diagram-specific classes ---
+  inspection-layer: {
+    shape: step
+    width: 160
+    height: 60
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      bold: true
+    }
+  }
+  threat-layer: {
+    shape: step
+    width: 160
+    height: 60
+    style: {
+      fill: ${surface}
+      stroke: ${orange}
+      font-color: ${text}
+      bold: true
+    }
+  }
+  policy-node: {
+    shape: hexagon
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-width: 2
+      font-color: ${text}
+    }
+  }
+  blocked: {
+    style: {
+      stroke: ${danger}
+      stroke-width: 2
+      stroke-dash: 4
+    }
+  }
+}
+
+# ============================================================
+# Untrusted sources (left side)
+# ============================================================
+end_user: End User { class: actor }
+
+app: Client Application {
+  class: external-node
+}
+
+agent_caller: AI Agent (caller) {
+  class: external-node
+}
+
+# ============================================================
+# AI Agent Firewall
+# ============================================================
+firewall: AI Agent Firewall {
+  class: security-boundary
+
+  # --- Inbound inspection pipeline ---
+  inbound: Inbound Inspection {
+    class: account-boundary
+    direction: right
+    label.near: outside-top-center
+
+    rate_limit: Rate Limiter {
+      class: inspection-layer
+    }
+
+    auth: AuthN / AuthZ {
+      class: inspection-layer
+    }
+
+    input_val: Input Validation {
+      class: inspection-layer
+    }
+
+    prompt_detect: Prompt Injection\nDetection {
+      class: threat-layer
+    }
+
+    pii_filter: PII Detection\n& Redaction {
+      class: threat-layer
+    }
+
+    policy_in: Policy Engine {
+      class: policy-node
+    }
+  }
+
+  # --- Outbound inspection pipeline ---
+  outbound: Outbound Inspection {
+    class: account-boundary
+    direction: right
+    label.near: outside-top-center
+
+    output_san: Output Sanitizer {
+      class: inspection-layer
+    }
+
+    halluc: Hallucination\nDetector {
+      class: threat-layer
+    }
+
+    toxicity: Toxicity &\nBias Filter {
+      class: threat-layer
+    }
+
+    data_leak: Data Leakage\nPrevention {
+      class: threat-layer
+    }
+
+    policy_out: Policy Engine {
+      class: policy-node
+    }
+  }
+
+  # --- Observability ---
+  observe: Observability {
+    class: service-group
+
+    audit: Audit Log {
+      class: datastore
+    }
+
+    threat_intel: Threat Intelligence {
+      class: internal-service
+    }
+
+    alerts: Alert Queue {
+      class: queue
+    }
+
+    dashboard: Analytics Dashboard {
+      class: internal-service
+    }
+  }
+}
+
+# ============================================================
+# Protected AI backends (right side)
+# ============================================================
+models: AI Models & Agents {
+  class: account-boundary
+
+  llm: LLM (GPT / Claude) {
+    class: internal-service
+  }
+
+  agent: Autonomous Agent {
+    class: internal-service
+    style.multiple: true
+  }
+
+  tools: Tool APIs {
+    class: internal-service
+  }
+
+  rag: RAG / Vector DB {
+    class: datastore
+  }
+}
+
+# --- Rejection sinks ---
+blocked_resp: Blocked / Rejected {
+  shape: oval
+  style: {
+    fill: "#3A1A1A"
+    stroke: ${danger}
+    font-color: ${danger}
+    bold: true
+  }
+}
+
+soc: SOC / Security Team {
+  class: actor
+}
+
+# ============================================================
+# Connections: Inbound flow
+# ============================================================
+end_user -> app: prompt { class: sync-connection }
+agent_caller -> firewall.inbound.rate_limit: API call { class: boundary-crossing }
+app -> firewall.inbound.rate_limit: request { class: boundary-crossing }
+
+# Inbound pipeline chain
+firewall.inbound.rate_limit -> firewall.inbound.auth: passes { class: data-flow }
+firewall.inbound.auth -> firewall.inbound.input_val: authenticated { class: data-flow }
+firewall.inbound.input_val -> firewall.inbound.prompt_detect: valid schema { class: data-flow }
+firewall.inbound.prompt_detect -> firewall.inbound.pii_filter: safe prompt { class: data-flow }
+firewall.inbound.pii_filter -> firewall.inbound.policy_in: redacted { class: data-flow }
+
+# Inbound -> AI models
+firewall.inbound.policy_in -> models.llm: approved request { class: data-flow }
+firewall.inbound.policy_in -> models.agent: agent dispatch { class: data-flow }
+
+# Agent tool use
+models.agent -> models.tools: invokes { class: sync-connection }
+models.agent -> models.rag: retrieves context { class: sync-connection }
+
+# ============================================================
+# Connections: Outbound flow
+# ============================================================
+models.llm -> firewall.outbound.output_san: raw response { class: data-flow }
+models.agent -> firewall.outbound.output_san: agent output { class: data-flow }
+
+# Outbound pipeline chain
+firewall.outbound.output_san -> firewall.outbound.halluc: sanitized { class: data-flow }
+firewall.outbound.halluc -> firewall.outbound.toxicity: verified { class: data-flow }
+firewall.outbound.toxicity -> firewall.outbound.data_leak: clean { class: data-flow }
+firewall.outbound.data_leak -> firewall.outbound.policy_out: no leaks { class: data-flow }
+
+# Outbound -> user
+firewall.outbound.policy_out -> app: safe response { class: boundary-crossing }
+
+# ============================================================
+# Connections: Rejection paths
+# ============================================================
+firewall.inbound.rate_limit -> blocked_resp: throttled { class: blocked }
+firewall.inbound.prompt_detect -> blocked_resp: injection detected { class: blocked }
+firewall.inbound.policy_in -> blocked_resp: policy violation { class: blocked }
+firewall.outbound.toxicity -> blocked_resp: toxic content { class: blocked }
+firewall.outbound.data_leak -> blocked_resp: data leak { class: blocked }
+
+# ============================================================
+# Connections: Observability (passive)
+# ============================================================
+firewall.inbound -> firewall.observe.audit: logs all requests { class: monitoring-link }
+firewall.outbound -> firewall.observe.audit: logs all responses { class: monitoring-link }
+firewall.inbound.prompt_detect -> firewall.observe.threat_intel: threat signals { class: monitoring-link }
+firewall.outbound.data_leak -> firewall.observe.threat_intel: leak signals { class: monitoring-link }
+firewall.observe.threat_intel -> firewall.observe.alerts: triggers { class: async-connection }
+firewall.observe.alerts -> soc: notifies { class: critical-path }
+firewall.observe.audit -> firewall.observe.dashboard: aggregates { class: monitoring-link }

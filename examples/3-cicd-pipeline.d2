@@ -1,0 +1,194 @@
+# LEVEL: L2 -- CI/CD Pipeline
+# AUDIENCE: Engineering, DevOps
+# COMPLIANCE: none
+# Shows: GitHub Actions pipeline with parallel tests, Docker build, canary deploy
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary: "#162646"
+  secondary: "#385FAF"
+  accent: "#9CADD7"
+  surface: "#1C2F4A"
+  text: "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted: "#739BCF"
+  orange: "#F5871F"
+  success: "#4CAF80"
+  danger: "#E24B4A"
+}
+
+classes: {
+  sync-connection: {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  data-flow: {
+    style: {
+      stroke: ${accent}
+      stroke-width: 2
+      animated: true
+    }
+  }
+  monitoring-link: {
+    style: {
+      stroke: "#494C4D"
+      stroke-dash: 3
+      stroke-width: 1
+    }
+  }
+  internal-service: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+      shadow: true
+    }
+  }
+  external-node: {
+    style: {
+      fill: ${surface}
+      stroke: ${orange}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+    }
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style: {
+      fill: ${surface}
+      stroke: ${muted}
+      font-color: ${text}
+    }
+  }
+  service-group: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-dash: 3
+      font-color: ${text}
+      border-radius: 8
+      opacity: 0.85
+      bold: true
+    }
+  }
+  pipeline-step: {
+    shape: step
+    width: 140
+    height: 55
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      bold: true
+    }
+  }
+  check-box: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      border-radius: 6
+    }
+  }
+  approval: {
+    shape: diamond
+    style: {
+      fill: ${surface}
+      stroke: ${orange}
+      font-color: ${text}
+      bold: true
+    }
+  }
+}
+
+# --- Source ---
+dev: Developer { class: actor }
+
+github: GitHub {
+  class: internal-service
+  icon: https://icons.terrastruct.com/dev%2Fgithub.svg
+}
+
+# --- Build ---
+build: Build { class: pipeline-step }
+
+# --- Test (parallel) ---
+tests: Test Suite {
+  class: service-group
+  grid-rows: 2
+  grid-columns: 2
+  grid-gap: 8
+
+  unit: "Unit Tests\n142 tests" { class: check-box }
+  integration: "Integration\n38 tests" { class: check-box }
+  e2e: "E2E Tests\n24 tests" { class: check-box }
+  security: "Snyk Scan\nSAST + SCA" { class: check-box }
+}
+
+# --- Docker ---
+docker: Docker Build {
+  class: internal-service
+  icon: https://icons.terrastruct.com/dev%2Fdocker.svg
+}
+
+ecr: Push to ECR {
+  class: internal-service
+  icon: https://icons.terrastruct.com/aws%2FCompute%2FAmazon-Elastic-Container-Service.svg
+}
+
+# --- Deploy ---
+staging: Deploy Staging { class: pipeline-step }
+approve: Manual Approval { class: approval }
+prod: Production {
+  class: pipeline-step
+  style.stroke: ${success}
+}
+canary: Canary Analysis { class: check-box; style.stroke: ${success} }
+
+# --- Monitoring ---
+datadog: Datadog { class: external-node }
+
+# --- Flow ---
+dev -> github: git push { class: data-flow }
+github -> build: webhook { class: data-flow }
+build -> tests: artifacts { class: data-flow }
+tests -> docker: all passed { class: data-flow }
+docker -> ecr: image { class: data-flow }
+ecr -> staging: deploy { class: data-flow }
+staging -> approve: ready { class: sync-connection }
+approve -> prod: approved {
+  style: {
+    stroke: ${success}
+    stroke-width: 3
+    animated: true
+  }
+}
+approve -> github: rejected {
+  style: {
+    stroke: ${danger}
+    stroke-dash: 5
+    stroke-width: 2
+  }
+}
+prod -> canary: validates { class: sync-connection }
+prod -> datadog: metrics { class: monitoring-link }
+datadog -> dev: alerts {
+  style: {
+    stroke: ${danger}
+    stroke-dash: 5
+    animated: true
+  }
+}

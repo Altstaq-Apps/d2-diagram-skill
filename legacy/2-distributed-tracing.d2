@@ -1,0 +1,294 @@
+direction: down
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 301
+    layout-engine: elk
+  }
+  primary: "#1a4731"
+  secondary: "#276749"
+  accent: "#68d391"
+  surface: "#f0fff4"
+  text: "#1a202c"
+  text-light: "#ffffff"
+  muted: "#a0aec0"
+}
+
+classes: {
+  span: {
+    shape: step
+    style: {
+      fill: ${secondary}
+      font-color: ${text-light}
+      bold: true
+      shadow: true
+      font-size: 12
+    }
+  }
+  service: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      border-radius: 12
+      shadow: true
+    }
+  }
+  trace-link: {
+    style: {
+      stroke: ${accent}
+      stroke-width: 2
+      animated: true
+    }
+  }
+  async-span: {
+    style: {
+      stroke: ${secondary}
+      stroke-dash: 5
+      stroke-width: 2
+    }
+  }
+  icon-service: {
+    width: 140
+    height: 100
+    style: {
+      border-radius: 12
+    }
+  }
+}
+
+request-in: "User Request\nGET /api/orders/123" {
+  shape: oval
+  style: {
+    fill: "#fefcbf"
+    stroke: "#d69e2e"
+    font-color: ${text}
+    bold: true
+  }
+}
+
+api-gateway: "API\nGateway" {
+  class: service
+  class: icon-service
+  icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-API-Gateway.svg
+  
+  api-span: "api-gateway\n(45ms)" {
+    class: span
+  }
+}
+
+order-service: "Order\nService" {
+  class: service
+  class: icon-service
+  icon: https://icons.terrastruct.com/dev%2Fnodejs.svg
+  
+  order-span: "getOrder()\n(32ms)" {
+    class: span
+  }
+  
+  db-call: "db.query()\n(18ms)" {
+    class: span
+  }
+  
+  cache-check: "cache.get()\n(2ms)" {
+    class: span
+  }
+  
+  order-span -> db-call: Sequential {class: trace-link}
+  order-span -> cache-check: Parallel {
+    style: {
+      stroke: ${accent}
+      stroke-width: 2
+    }
+  }
+}
+
+user-service: "User\nService" {
+  class: service
+  class: icon-service
+  icon: https://icons.terrastruct.com/dev%2Fgo.svg
+  
+  user-span: "getUserDetails()\n(15ms)" {
+    class: span
+  }
+  
+  user-cache: "cache.get(user)\n(1ms)" {
+    class: span
+  }
+  
+  user-span -> user-cache {class: trace-link}
+}
+
+inventory-service: "Inventory\nService" {
+  class: service
+  class: icon-service
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+  
+  inventory-span: "checkInventory()\n(12ms)" {
+    class: span
+  }
+  
+  inventory-db: "db.query()\n(8ms)" {
+    class: span
+  }
+  
+  inventory-span -> inventory-db {class: trace-link}
+}
+
+async-queue: "Event\nQueue" {
+  shape: queue
+  style: {
+    fill: ${surface}
+    stroke: ${secondary}
+    font-color: ${text}
+  }
+  icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Queue-Service-SQS.svg
+  width: 100
+  height: 60
+  
+  queue-event: "OrderCreated\nenqueued\n0ms" {
+    class: span
+    style.font-size: 11
+  }
+}
+
+analytics-service: "Analytics\nService" {
+  class: service
+  class: icon-service
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+  
+  analytics-span: "processEvent()\n(8ms) ASYNC" {
+    class: span
+  }
+}
+
+database: "Order\nDatabase" {
+  shape: cylinder
+  style: {
+    fill: ${surface}
+    stroke: ${secondary}
+    font-color: ${text}
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/dev%2Fpostgresql.svg
+  width: 100
+  height: 70
+}
+
+cache: "Redis\nCache" {
+  shape: cylinder
+  style: {
+    fill: ${surface}
+    stroke: ${accent}
+    font-color: ${text}
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/dev%2Fredis.svg
+  width: 100
+  height: 70
+}
+
+jaeger: "Jaeger\nCollector" {
+  style: {
+    fill: "#faf5ff"
+    stroke: "#6b46c1"
+    font-color: ${text}
+    border-radius: 12
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+  width: 100
+  height: 70
+}
+
+response-out: "Response\n200 OK\n(45ms total)" {
+  shape: oval
+  style: {
+    fill: "#c6f6d5"
+    stroke: "#276749"
+    font-color: "#1a4731"
+    bold: true
+  }
+}
+
+request-in -> api-gateway {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}
+
+api-gateway.api-span -> order-service.order-span {class: trace-link}
+order-service.order-span -> user-service.user-span: Parallel {
+  style: {
+    stroke: ${accent}
+    stroke-width: 2
+  }
+}
+order-service.order-span -> inventory-service.inventory-span: Parallel {
+  style: {
+    stroke: ${accent}
+    stroke-width: 2
+  }
+}
+
+order-service.db-call -> database {
+  style: {
+    stroke: ${secondary}
+    stroke-dash: 3
+  }
+}
+user-service.user-cache -> cache {
+  style: {
+    stroke: ${accent}
+    stroke-dash: 3
+  }
+}
+inventory-service.inventory-db -> database {
+  style: {
+    stroke: ${secondary}
+    stroke-dash: 3
+  }
+}
+
+order-service.order-span -> async-queue.queue-event: Fire & Forget {class: async-span}
+async-queue.queue-event -> analytics-service.analytics-span {class: async-span}
+
+api-gateway.api-span -> jaeger: Export Trace {
+  style: {
+    stroke: ${muted}
+    stroke-dash: 5
+  }
+}
+order-service.order-span -> jaeger {
+  style: {
+    stroke: ${muted}
+    stroke-dash: 5
+  }
+}
+user-service.user-span -> jaeger {
+  style: {
+    stroke: ${muted}
+    stroke-dash: 5
+  }
+}
+inventory-service.inventory-span -> jaeger {
+  style: {
+    stroke: ${muted}
+    stroke-dash: 5
+  }
+}
+analytics-service.analytics-span -> jaeger {
+  style: {
+    stroke: ${muted}
+    stroke-dash: 5
+  }
+}
+
+api-gateway.api-span -> response-out {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+  }
+}

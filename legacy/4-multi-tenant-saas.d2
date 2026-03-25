@@ -1,0 +1,384 @@
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 104
+    layout-engine: elk
+  }
+}
+
+classes: {
+  tenant: {
+    style: {
+      fill: "#e6f3ff"
+      stroke: "#0066cc"
+      font-color: "#003d99"
+      border-radius: 12
+      shadow: true
+      bold: true
+    }
+  }
+  shared: {
+    style: {
+      fill: "#fff3e0"
+      stroke: "#ff6600"
+      font-color: "#cc5200"
+      border-radius: 12
+      shadow: true
+      bold: true
+    }
+  }
+  isolation: {
+    style: {
+      fill: "#f3e5f5"
+      stroke: "#7c3aed"
+      font-color: "#5b21b6"
+      border-radius: 12
+      shadow: true
+      bold: true
+    }
+  }
+  router: {
+    style: {
+      fill: "#fef3c7"
+      stroke: "#ca8a04"
+      font-color: "#92400e"
+      border-radius: 8
+      bold: true
+    }
+  }
+}
+
+internet: Internet {
+  shape: cloud
+  style: {
+    fill: "#e5e7eb"
+    stroke: "#6b7280"
+    font-color: "#1f2937"
+    bold: true
+  }
+}
+
+api-gateway: "API Gateway\n(Multi-tenant Router)" {
+  class: router
+  icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-API-Gateway.svg
+}
+
+tenant-resolver: Tenant Resolver {
+  class: shared
+  icon: https://icons.terrastruct.com/dev%2Fredis.svg
+}
+
+auth-service: Auth Service {
+  class: shared
+  icon: https://icons.terrastruct.com/aws%2FSecurity%2C%20Identity%2C%20%26%20Compliance%2FAWS-Shield.svg
+}
+
+tenant-a: "Tenant A: ACME Corp" {
+  class: tenant
+  
+  api-a: "API Service" {
+    style: {
+      fill: "#dbeafe"
+      stroke: "#0284c7"
+      font-color: "#0c4a6e"
+      border-radius: 8
+    }
+    icon: https://icons.terrastruct.com/dev%2Fnodejs.svg
+  }
+  
+  db-a: "Postgres Instance" {
+    shape: cylinder
+    style: {
+      fill: "#dbeafe"
+      stroke: "#0284c7"
+      font-color: "#0c4a6e"
+      shadow: true
+    }
+    icon: https://icons.terrastruct.com/dev%2Fpostgresql.svg
+  }
+  
+  cache-a: "Redis Cache" {
+    shape: cylinder
+    style: {
+      fill: "#dbeafe"
+      stroke: "#0284c7"
+      font-color: "#0c4a6e"
+      shadow: true
+    }
+    icon: https://icons.terrastruct.com/dev%2Fredis.svg
+  }
+  
+  storage-a: "Object Storage\n(S3 Bucket)" {
+    style: {
+      fill: "#dbeafe"
+      stroke: "#0284c7"
+      font-color: "#0c4a6e"
+      border-radius: 8
+      shadow: true
+    }
+    icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  }
+  
+  api-a -> db-a {
+    style: {
+      stroke: "#0284c7"
+      stroke-width: 2
+    }
+  }
+  api-a -> cache-a {
+    style: {
+      stroke: "#0284c7"
+      stroke-dash: 3
+    }
+  }
+  api-a -> storage-a {
+    style: {
+      stroke: "#0284c7"
+      stroke-dash: 5
+    }
+  }
+}
+
+tenant-b: "Tenant B: TechCorp" {
+  class: tenant
+  
+  api-b: "API Service" {
+    style: {
+      fill: "#dcfce7"
+      stroke: "#16a34a"
+      font-color: "#15803d"
+      border-radius: 8
+    }
+    icon: https://icons.terrastruct.com/dev%2Fgo.svg
+  }
+  
+  db-b: "MongoDB Cluster" {
+    shape: cylinder
+    style.multiple: true
+    style: {
+      fill: "#dcfce7"
+      stroke: "#16a34a"
+      font-color: "#15803d"
+      shadow: true
+    }
+    icon: https://icons.terrastruct.com/dev%2Fmongodb.svg
+  }
+  
+  cache-b: "Memcached" {
+    shape: cylinder
+    style: {
+      fill: "#dcfce7"
+      stroke: "#16a34a"
+      font-color: "#15803d"
+      shadow: true
+    }
+    icon: https://icons.terrastruct.com/dev%2Fredis.svg
+  }
+  
+  storage-b: "Object Storage\n(GCS Bucket)" {
+    style: {
+      fill: "#dcfce7"
+      stroke: "#16a34a"
+      font-color: "#15803d"
+      border-radius: 8
+      shadow: true
+    }
+    icon: https://icons.terrastruct.com/gcp%2FProducts%20and%20services%2FStorage%2FCloud%20Storage.svg
+  }
+  
+  api-b -> db-b {
+    style: {
+      stroke: "#16a34a"
+      stroke-width: 2
+    }
+  }
+  api-b -> cache-b {
+    style: {
+      stroke: "#16a34a"
+      stroke-dash: 3
+    }
+  }
+  api-b -> storage-b {
+    style: {
+      stroke: "#16a34a"
+      stroke-dash: 5
+    }
+  }
+}
+
+isolation-layer: Isolation & Security {
+  class: isolation
+  
+  rbac: "RBAC\n(Row-level)" {
+    style: {
+      fill: "#ede9fe"
+      stroke: "#7c3aed"
+      font-color: "#5b21b6"
+      border-radius: 6
+      font-size: 11
+    }
+  }
+  
+  encryption: "Encryption\n(Field-level)" {
+    style: {
+      fill: "#ede9fe"
+      stroke: "#7c3aed"
+      font-color: "#5b21b6"
+      border-radius: 6
+      font-size: 11
+    }
+  }
+  
+  audit: "Audit Logging\n(Per-tenant)" {
+    style: {
+      fill: "#ede9fe"
+      stroke: "#7c3aed"
+      font-color: "#5b21b6"
+      border-radius: 6
+      font-size: 11
+    }
+  }
+}
+
+shared-resources: Shared Infrastructure {
+  class: shared
+  
+  monitoring: Monitoring Stack {
+    style: {
+      fill: "#fef08a"
+      stroke: "#ca8a04"
+      font-color: "#713f12"
+      border-radius: 8
+    }
+    icon: https://icons.terrastruct.com/dev%2Fpython.svg
+  }
+  
+  logging: Centralized Logging {
+    style: {
+      fill: "#fef08a"
+      stroke: "#ca8a04"
+      font-color: "#713f12"
+      border-radius: 8
+    }
+    icon: https://icons.terrastruct.com/dev%2Fpython.svg
+  }
+  
+  usage-tracking: "Usage Metering\n& Billing" {
+    style: {
+      fill: "#fef08a"
+      stroke: "#ca8a04"
+      font-color: "#713f12"
+      border-radius: 8
+    }
+    icon: https://icons.terrastruct.com/dev%2Fgo.svg
+  }
+}
+
+internet -> api-gateway {
+  style: {
+    stroke: "#6b7280"
+    stroke-width: 2
+  }
+}
+
+api-gateway -> tenant-resolver {
+  style: {
+    stroke: "#ca8a04"
+    stroke-width: 2
+  }
+}
+
+api-gateway -> auth-service {
+  style: {
+    stroke: "#ca8a04"
+    stroke-width: 2
+  }
+}
+
+tenant-resolver -> tenant-a.api-a {
+  style: {
+    stroke: "#0284c7"
+    stroke-width: 2
+    animated: true
+  }
+}
+
+tenant-resolver -> tenant-b.api-b {
+  style: {
+    stroke: "#16a34a"
+    stroke-width: 2
+    animated: true
+  }
+}
+
+auth-service -> tenant-a {
+  style: {
+    stroke: "#ca8a04"
+    stroke-dash: 5
+  }
+}
+
+auth-service -> tenant-b {
+  style: {
+    stroke: "#ca8a04"
+    stroke-dash: 5
+  }
+}
+
+tenant-a -> isolation-layer {
+  style: {
+    stroke: "#7c3aed"
+    stroke-dash: 3
+  }
+}
+
+tenant-b -> isolation-layer {
+  style: {
+    stroke: "#7c3aed"
+    stroke-dash: 3
+  }
+}
+
+shared-resources.monitoring -> tenant-a {
+  style: {
+    stroke: "#ca8a04"
+    stroke-dash: 5
+  }
+}
+
+shared-resources.monitoring -> tenant-b {
+  style: {
+    stroke: "#ca8a04"
+    stroke-dash: 5
+  }
+}
+
+shared-resources.logging -> tenant-a {
+  style: {
+    stroke: "#ca8a04"
+    stroke-dash: 5
+  }
+}
+
+shared-resources.logging -> tenant-b {
+  style: {
+    stroke: "#ca8a04"
+    stroke-dash: 5
+  }
+}
+
+shared-resources.usage-tracking -> tenant-a {
+  style: {
+    stroke: "#ca8a04"
+    stroke-dash: 5
+  }
+}
+
+shared-resources.usage-tracking -> tenant-b {
+  style: {
+    stroke: "#ca8a04"
+    stroke-dash: 5
+  }
+}

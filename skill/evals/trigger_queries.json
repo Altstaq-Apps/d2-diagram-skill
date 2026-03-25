@@ -1,0 +1,106 @@
+[
+  {
+    "query": "I need to diagram our microservices architecture -- we have about 12 services running on EKS with an API gateway in front and a Kafka event bus connecting the order, payment, and inventory services. Can you draw this out so I can present it to the team?",
+    "should_trigger": true
+  },
+  {
+    "query": "sketch out the network topology for our new office setup. We've got a Meraki firewall, two VLANs (corporate and guest), a pair of Cisco switches, and about 200 endpoints. I want something visual I can hand to the IT director.",
+    "should_trigger": true
+  },
+  {
+    "query": "Can you visualize the data flow in our ETL pipeline? Source is a PostgreSQL DB, gets extracted by Airflow, transformed in Spark on EMR, then loaded into Redshift. There's also a branch that dumps raw data to S3 for the data science team.",
+    "should_trigger": true
+  },
+  {
+    "query": "i want to map out our AWS infrastructure. we have 3 accounts (dev, staging, prod) each with their own VPC. prod has a multi-AZ setup with RDS, ElastiCache, and ECS Fargate behind an ALB. make it look professional, not just boxes and lines",
+    "should_trigger": true
+  },
+  {
+    "query": "Show me a sequence diagram for our OAuth2 login flow. Browser hits our Next.js app, which redirects to Auth0, user authenticates, Auth0 sends the callback with an authorization code, our backend exchanges it for tokens, stores the session in Redis, and sends back a cookie.",
+    "should_trigger": true
+  },
+  {
+    "query": "I'm documenting our database schema and need an ER diagram. We have users, organizations (many-to-many through memberships), projects belonging to orgs, and tasks belonging to projects with assignees. Include the foreign keys and cardinality.",
+    "should_trigger": true
+  },
+  {
+    "query": "draw a flowchart for our incident response process. starts with alert from PagerDuty, triage by on-call engineer, decision point for severity (P1 goes to war room, P2-P4 go to ticket queue), resolution steps, postmortem, and lessons learned feedback loop",
+    "should_trigger": true
+  },
+  {
+    "query": "We need a system design diagram for the new real-time notifications feature. WebSocket server on ECS, connected to Redis pub/sub, with SNS for mobile push notifications and SES for email fallback. Show how events flow from the API to user devices.",
+    "should_trigger": true
+  },
+  {
+    "query": "Can you create a visual showing our Kubernetes cluster? 3 namespaces (platform, app, monitoring), with deployments for each service, the istio service mesh sidecar pattern, and persistent volumes for the stateful sets. I want to include it in our architecture docs.",
+    "should_trigger": true
+  },
+  {
+    "query": "map out the CI/CD pipeline for me -- developer pushes to GitHub, triggers Actions workflow, runs parallel linting/testing/security-scan jobs, builds Docker image, pushes to ECR, deploys to staging via ArgoCD, manual approval, then production rollout with canary",
+    "should_trigger": true
+  },
+  {
+    "query": "I need an L1 landscape diagram of our Bluestaq product ecosystem for the customer briefing next week. Show UDL, GDM, and platform services with the government operators and DoD data sources.",
+    "should_trigger": true
+  },
+  {
+    "query": "Can you create a deployment diagram showing our GovCloud infrastructure? We need to show the VPC with two availability zones, public and private subnets, the ALB, API pods, and the data layer with RDS and S3. FedRAMP High boundary needs to be visible.",
+    "should_trigger": true
+  },
+  {
+    "query": "Draw the data flow for UDL ingest pipeline -- from external sensors through the adapter, validator, and classifier stages, into S3 and the metadata catalog, then out through the discovery and share APIs to consumers.",
+    "should_trigger": true
+  },
+  {
+    "query": "I need a network security topology diagram showing our trust zones and the FedRAMP High boundary for the ISSO review. Include the DMZ, WAF, restricted zone, and data zone with all the boundary crossings marked.",
+    "should_trigger": true
+  },
+  {
+    "query": "Can you help me write a D3.js bar chart component in React? I have sales data by quarter and want an interactive chart with tooltips showing the exact values when you hover over each bar.",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to set up a Grafana dashboard for monitoring our Kubernetes cluster. Can you write the JSON provisioning config for panels showing CPU usage, memory, pod restarts, and network I/O?",
+    "should_trigger": false
+  },
+  {
+    "query": "Help me fix this D2 syntax error. I'm getting 'unexpected token' on line 45 of my diagram file. Here's the relevant section: `vpc.web -> vpc.api: { style: { stroke: #2b6cb0 } }` -- I think it's the hex color without quotes?",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a Terraform module for our AWS VPC with public and private subnets across 3 AZs, a NAT gateway, and security groups for our web tier, app tier, and database tier. Use variables for the CIDR blocks.",
+    "should_trigger": false
+  },
+  {
+    "query": "I need to create a matplotlib visualization of our A/B test results. Two groups, conversion rates over 30 days, with confidence intervals shaded. Export as PNG for the product review deck.",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you explain how Kubernetes services work? Specifically the difference between ClusterIP, NodePort, and LoadBalancer types, and when to use each one. I'm studying for the CKA exam.",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a PlantUML class diagram for our Java project. We have an abstract Shape class with Circle, Rectangle, and Triangle subclasses. Each implements an area() method. Include the interface Drawable.",
+    "should_trigger": false
+  },
+  {
+    "query": "I want to generate a PDF report from our database. It should have a cover page with the company logo, a table of contents, then tables showing monthly revenue by product line with charts embedded inline. Use Python with ReportLab.",
+    "should_trigger": false
+  },
+  {
+    "query": "Help me configure our Datadog APM setup. I need to add tracing to our Node.js Express API with custom spans for database queries and external HTTP calls. Also set up a service map in the Datadog dashboard.",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you create an ASCII art diagram of our git branching strategy? main -> develop -> feature branches, with release branches forking off develop and hotfix branches off main. Just a simple text representation for our README.",
+    "should_trigger": false
+  },
+  {
+    "query": "Can you help me configure the Bluestaq color scheme in our Tailwind CSS config? I need the navy primary, blue secondary, and orange accent colors set up as custom utilities.",
+    "should_trigger": false
+  },
+  {
+    "query": "Write a FedRAMP System Security Plan (SSP) section 13 for our boundary description. It should cover the authorization boundary, data flows, and interconnections in prose format for the auditors.",
+    "should_trigger": false
+  }
+]

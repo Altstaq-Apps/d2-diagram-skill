@@ -1,0 +1,384 @@
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary: "#44337a"
+  secondary: "#6b46c1"
+  accent: "#d6bcfa"
+  surface: "#faf5ff"
+  text: "#1a202c"
+  text-light: "#ffffff"
+  muted: "#b794f4"
+}
+
+classes: {
+  control-plane: {
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      font-color: ${text-light}
+      border-radius: 12
+      shadow: true
+      bold: true
+    }
+  }
+  data-plane: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      border-radius: 12
+      shadow: true
+    }
+  }
+  proxy: {
+    shape: hexagon
+    style: {
+      fill: ${accent}
+      stroke: ${secondary}
+      font-color: ${text}
+      bold: true
+    }
+  }
+  workload: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      font-color: ${text}
+      border-radius: 8
+      shadow: true
+    }
+  }
+  config: {
+    shape: document
+    style: {
+      fill: "#fef08a"
+      stroke: "#ca8a04"
+      font-color: ${text}
+      bold: true
+    }
+  }
+  mesh-link: {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+      animated: true
+    }
+  }
+}
+
+control-plane-box: "Istio Control Plane" {
+  class: control-plane
+  
+  pilot: "Pilot\n(Traffic management)" {
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      font-color: ${text-light}
+      border-radius: 8
+      bold: true
+    }
+    icon: https://icons.terrastruct.com/dev%2Fgo.svg
+  }
+  
+  galley: "Galley\n(Config validation)" {
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      font-color: ${text-light}
+      border-radius: 8
+      bold: true
+    }
+    icon: https://icons.terrastruct.com/dev%2Fgo.svg
+  }
+  
+  citadel: "Citadel\n(Security/PKI)" {
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      font-color: ${text-light}
+      border-radius: 8
+      bold: true
+    }
+    icon: https://icons.terrastruct.com/aws%2FSecurity%2C%20Identity%2C%20%26%20Compliance%2FAWS-Shield.svg
+  }
+  
+  pilot -> galley {
+    style: {
+      stroke: ${muted}
+      stroke-width: 2
+    }
+  }
+  
+  galley -> citadel {
+    style: {
+      stroke: ${muted}
+      stroke-width: 2
+    }
+  }
+}
+
+data-plane-box: "Data Plane (Services)" {
+  class: data-plane
+  
+  namespace-a: "Namespace: payment" {
+    style: {
+      fill: "#f3e8ff"
+      stroke: ${secondary}
+      border-radius: 12
+      opacity: 0.9
+      font-color: ${text}
+      bold: true
+    }
+    
+    svc-a: Payment Service {
+      class: workload
+      icon: https://icons.terrastruct.com/dev%2Fnodejs.svg
+    }
+    
+    proxy-a: Envoy Proxy {
+      class: proxy
+      icon: https://icons.terrastruct.com/dev%2Fgo.svg
+    }
+    
+    svc-a -> proxy-a {
+      style: {
+        stroke: ${secondary}
+        stroke-dash: 3
+      }
+    }
+  }
+  
+  namespace-b: "Namespace: order" {
+    style: {
+      fill: "#f3e8ff"
+      stroke: ${secondary}
+      border-radius: 12
+      opacity: 0.9
+      font-color: ${text}
+      bold: true
+    }
+    
+    svc-b: Order Service {
+      class: workload
+      icon: https://icons.terrastruct.com/dev%2Fgo.svg
+    }
+    
+    proxy-b: Envoy Proxy {
+      class: proxy
+      icon: https://icons.terrastruct.com/dev%2Fgo.svg
+    }
+    
+    svc-b -> proxy-b {
+      style: {
+        stroke: ${secondary}
+        stroke-dash: 3
+      }
+    }
+  }
+  
+  namespace-c: "Namespace: inventory" {
+    style: {
+      fill: "#f3e8ff"
+      stroke: ${secondary}
+      border-radius: 12
+      opacity: 0.9
+      font-color: ${text}
+      bold: true
+    }
+    
+    svc-c: Inventory Service {
+      class: workload
+      icon: https://icons.terrastruct.com/dev%2Fpython.svg
+    }
+    
+    proxy-c: Envoy Proxy {
+      class: proxy
+      icon: https://icons.terrastruct.com/dev%2Fgo.svg
+    }
+    
+    svc-c -> proxy-c {
+      style: {
+        stroke: ${secondary}
+        stroke-dash: 3
+      }
+    }
+  }
+}
+
+virtual-service: VirtualService (payment) {
+  class: config
+}
+
+destination-rule: "DestinationRule\n(load balancing)" {
+  class: config
+}
+
+request-auth: "RequestAuthentication\n(mTLS)" {
+  class: config
+}
+
+traffic-policy: "PeerAuthentication\n(strict mTLS)" {
+  class: config
+}
+
+gateway: Istio Ingress Gateway {
+  style: {
+    fill: "#fefcbf"
+    stroke: "#d69e2e"
+    font-color: ${text}
+    border-radius: 12
+    bold: true
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-API-Gateway.svg
+}
+
+gateway-config: "Gateway\n(routing rules)" {
+  class: config
+}
+
+external-users: External Users {
+  shape: person
+  style: {
+    fill: ${primary}
+    font-color: ${text-light}
+  }
+}
+
+kiali: "Kiali\n(Visualization)" {
+  style: {
+    fill: "#c6f6d5"
+    stroke: "#276749"
+    font-color: "#1a4731"
+    border-radius: 8
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+}
+
+jaeger: "Jaeger\n(Distributed tracing)" {
+  style: {
+    fill: "#c6f6d5"
+    stroke: "#276749"
+    font-color: "#1a4731"
+    border-radius: 8
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+}
+
+prometheus: "Prometheus\n(Metrics)" {
+  style: {
+    fill: "#c6f6d5"
+    stroke: "#276749"
+    font-color: "#1a4731"
+    border-radius: 8
+    shadow: true
+  }
+  icon: https://icons.terrastruct.com/dev%2Fpython.svg
+}
+
+control-plane-box.pilot -> data-plane-box {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+    animated: true
+  }
+}
+
+control-plane-box.citadel -> data-plane-box {
+  style: {
+    stroke: "#2dd4bf"
+    stroke-width: 2
+    stroke-dash: 5
+  }
+}
+
+virtual-service -> control-plane-box.pilot {
+  style: {
+    stroke: "#fbbf24"
+    stroke-width: 2
+  }
+}
+
+destination-rule -> control-plane-box.pilot {
+  style: {
+    stroke: "#fbbf24"
+    stroke-width: 2
+  }
+}
+
+traffic-policy -> control-plane-box.citadel {
+  style: {
+    stroke: "#2dd4bf"
+    stroke-width: 2
+  }
+}
+
+request-auth -> control-plane-box.citadel {
+  style: {
+    stroke: "#2dd4bf"
+    stroke-width: 2
+  }
+}
+
+gateway-config -> control-plane-box.pilot {
+  style: {
+    stroke: "#fbbf24"
+    stroke-width: 2
+  }
+}
+
+external-users -> gateway {
+  style: {
+    stroke: ${secondary}
+    stroke-width: 2
+    bold: true
+  }
+}
+
+gateway -> data-plane-box.namespace-a.proxy-a: "Route via\nVirtualService" {
+  class: mesh-link
+}
+
+data-plane-box.namespace-a.proxy-a -> data-plane-box.namespace-b.proxy-b: "Encrypted\n(mTLS)" {
+  class: mesh-link
+  style: {
+    stroke-width: 2
+    stroke-dash: 0
+  }
+}
+
+data-plane-box.namespace-b.proxy-b -> data-plane-box.namespace-c.proxy-c: "Load balanced\n(round-robin)" {
+  class: mesh-link
+  style: {
+    stroke-width: 2
+    stroke-dash: 0
+  }
+}
+
+data-plane-box -> kiali {
+  style: {
+    stroke: "#276749"
+    stroke-dash: 5
+  }
+}
+
+data-plane-box -> jaeger {
+  style: {
+    stroke: "#276749"
+    stroke-dash: 5
+  }
+}
+
+data-plane-box -> prometheus {
+  style: {
+    stroke: "#276749"
+    stroke-dash: 5
+  }
+}

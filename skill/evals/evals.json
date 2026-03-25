@@ -1,0 +1,102 @@
+{
+  "skill_name": "d2-diagram",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I need an architecture diagram for our web app. It's a React frontend served via CloudFront, hitting a Node.js API behind an ALB inside a VPC. The API talks to a PostgreSQL RDS instance and a Redis ElastiCache cluster in a private subnet. There's also an S3 bucket for user uploads. Can you diagram this?",
+      "expected_output": "A D2 diagram with sketch mode enabled, ELK layout, using AWS icons for CloudFront/ALB/RDS/ElastiCache/S3. Should have a VPC container with public and private subnets. Connections should flow left-to-right. Database nodes should use cylinder shapes. Uses the Bluestaq Navy palette and class library. Includes header comment block with LEVEL designation.",
+      "files": [],
+      "expectations": [
+        {"text": "Uses sketch mode (sketch: true in d2-config)", "category": "style"},
+        {"text": "Uses ELK layout engine", "category": "style"},
+        {"text": "Has VPC container with nested subnet containers (3+ nesting levels)", "category": "structure"},
+        {"text": "Uses AWS icons from icons.terrastruct.com for at least 4 services", "category": "content"},
+        {"text": "Database nodes use cylinder shape", "category": "semantics"},
+        {"text": "Uses Bluestaq Navy palette with vars (primary: #162646, surface: #1C2F4A)", "category": "style"},
+        {"text": "Connections defined after all containers (structure-first ordering)", "category": "structure"},
+        {"text": "Has explicit font-color on nodes with custom fills", "category": "style"},
+        {"text": "Includes header comment block with LEVEL designation", "category": "structure"},
+        {"text": "Uses Bluestaq class library (account-boundary, vpc-container, internal-service, datastore)", "category": "style"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Draw me a Kubernetes cluster topology. We have 2 namespaces: 'frontend' with an nginx ingress and a React deployment (3 replicas), and 'backend' with a Go API deployment (5 replicas), a Redis StatefulSet, and a PostgreSQL StatefulSet. There's a PersistentVolume for the databases. Show the services connecting deployments to ingress.",
+      "expected_output": "A D2 diagram showing a Kubernetes cluster container with namespace containers inside. Deployments should use 'multiple: true' for replicas. Services connect deployments. Ingress at the top routes to services. StatefulSets for Redis and PostgreSQL use cylinder shapes. PersistentVolumes shown. Uses Bluestaq Navy palette and header comment block.",
+      "files": [],
+      "expectations": [
+        {"text": "Has a Cluster container with nested Namespace containers (3+ nesting levels)", "category": "structure"},
+        {"text": "Uses 'multiple: true' for replica deployments", "category": "semantics"},
+        {"text": "Defines diagram-specific classes for k8s concepts (not just generic names)", "category": "style"},
+        {"text": "Uses Kubernetes icon from icons.terrastruct.com", "category": "content"},
+        {"text": "StatefulSet databases use cylinder shape", "category": "semantics"},
+        {"text": "Ingress connects to services which connect to deployments", "category": "structure"},
+        {"text": "Uses sketch mode, ELK layout, and Bluestaq Navy palette", "category": "style"},
+        {"text": "Includes header comment block with LEVEL designation", "category": "structure"},
+        {"text": "Cross-container connections route into specific nested children", "category": "structure"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Visualize our CI/CD pipeline: Developer pushes to GitHub, which triggers GitHub Actions. The pipeline runs 3 parallel jobs: unit tests, integration tests, and a security scan (Snyk). If all pass, it builds a Docker image, pushes to ECR, deploys to ECS staging. After manual approval, it deploys to production ECS with a canary rollout. Show the monitoring feedback loop from Datadog back to the team.",
+      "expected_output": "A D2 diagram with left-to-right flow showing pipeline stages. Parallel test jobs should use a grid layout. Step shapes for pipeline stages. Diamond for approval gate. Animated connections for the pipeline flow. GitHub and Docker icons. Monitoring feedback loop as a dashed animated connection. Uses Bluestaq Navy palette.",
+      "files": [],
+      "expectations": [
+        {"text": "Uses step shapes for pipeline stages", "category": "semantics"},
+        {"text": "Parallel test jobs rendered in a grid or side-by-side layout", "category": "structure"},
+        {"text": "Diamond shape for approval gate", "category": "semantics"},
+        {"text": "Animated connections for pipeline flow", "category": "style"},
+        {"text": "Uses GitHub and Docker icons from icons.terrastruct.com", "category": "content"},
+        {"text": "Monitoring feedback loop shown as dashed/animated connection", "category": "structure"},
+        {"text": "Uses sketch mode, ELK layout, and Bluestaq Navy palette", "category": "style"},
+        {"text": "Includes header comment block with LEVEL designation", "category": "structure"},
+        {"text": "Direction is right (left-to-right flow)", "category": "structure"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Create an executive-level overview diagram of our product ecosystem. We have three main products: a data platform (UDL), a marketplace (GDM), and shared platform services. Government operators and mission partners are the primary users. It connects to DoD data sources and runs on AWS GovCloud. This is for a customer briefing, so keep it high-level.",
+      "expected_output": "An L1 System Landscape diagram with Bluestaq Navy palette, actor nodes for gov operator and partner, account-boundary container for products, external-node for DoD and GovCloud, sync-connection and data-flow connectors.",
+      "files": [],
+      "expectations": [
+        {"text": "Header comment includes LEVEL: L1", "category": "structure"},
+        {"text": "Uses Bluestaq Navy palette (primary: #162646)", "category": "style"},
+        {"text": "Uses actor class for human users (person shape)", "category": "semantics"},
+        {"text": "Uses account-boundary class for outermost container", "category": "style"},
+        {"text": "Uses external-node class with orange stroke for external systems", "category": "style"},
+        {"text": "No internal services or infrastructure details shown (L1 scope)", "category": "structure"},
+        {"text": "Connector labels are short noun phrases (L1 rule)", "category": "content"}
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Diagram the network security topology for our FedRAMP High environment. Show trust zones: untrusted internet, DMZ with WAF and load balancer, a FedRAMP High boundary containing the restricted application tier and the data zone with RDS and S3. Include a management plane with CloudWatch and IAM. Mark all boundary crossings.",
+      "expected_output": "An L3 Network/Security diagram with security-boundary class for FedRAMP, trust-zone containers, firewall nodes, boundary-crossing class on edges that cross zones.",
+      "files": [],
+      "expectations": [
+        {"text": "Header comment includes LEVEL: L3 and COMPLIANCE: FedRAMP High", "category": "structure"},
+        {"text": "Uses security-boundary class (orange dashed) for FedRAMP boundary", "category": "style"},
+        {"text": "Uses boundary-crossing class on edges crossing trust zones", "category": "style"},
+        {"text": "Firewall/WAF nodes present in DMZ", "category": "content"},
+        {"text": "Monitoring connections use monitoring-link class (grey dashed)", "category": "style"},
+        {"text": "Uses Bluestaq Navy palette", "category": "style"},
+        {"text": "Connector labels include protocol+port (L3 rule)", "category": "content"}
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Show the end-to-end data flow for our data platform. External sensors and agency systems feed data through an ingest pipeline (adapter, validator, classifier stages), which stores objects in S3 and metadata in PostgreSQL. A search index powers a discovery API, and a share API lets government operators and mission apps retrieve data. Include an event bus for async notifications.",
+      "expected_output": "An L2 Data Flow diagram with pipeline-step shapes, data-flow animated connectors, async-connection for events, datastore classes for S3/PostgreSQL, queue for event bus.",
+      "files": [],
+      "expectations": [
+        {"text": "Header comment includes LEVEL: L2", "category": "structure"},
+        {"text": "Uses step shapes for pipeline stages", "category": "semantics"},
+        {"text": "Uses data-flow class (animated) for data movement", "category": "style"},
+        {"text": "Uses async-connection class for event bus connections", "category": "style"},
+        {"text": "Uses datastore class for S3 and PostgreSQL", "category": "semantics"},
+        {"text": "Uses Bluestaq Navy palette", "category": "style"},
+        {"text": "Direction is right (left-to-right flow)", "category": "structure"}
+      ]
+    }
+  ]
+}

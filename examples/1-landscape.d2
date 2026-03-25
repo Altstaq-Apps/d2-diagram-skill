@@ -1,0 +1,169 @@
+# LEVEL: L1 -- System Landscape
+# AUDIENCE: Executive / customer
+# COMPLIANCE: none
+# Shows: Bluestaq product ecosystem and primary external relationships
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary: "#162646"
+  secondary: "#385FAF"
+  accent: "#9CADD7"
+  surface: "#1C2F4A"
+  text: "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted: "#739BCF"
+  orange: "#F5871F"
+}
+
+classes: {
+  sync-connection: {
+    style: {
+      stroke: ${secondary}
+      stroke-width: 2
+    }
+  }
+  data-flow: {
+    style: {
+      stroke: ${accent}
+      stroke-width: 2
+      animated: true
+    }
+  }
+  monitoring-link: {
+    style: {
+      stroke: "#494C4D"
+      stroke-dash: 3
+      stroke-width: 1
+    }
+  }
+  internal-service: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-width: 1.5
+      font-color: ${text}
+      border-radius: 6
+      shadow: true
+    }
+  }
+  external-node: {
+    style: {
+      fill: ${surface}
+      stroke: ${orange}
+      stroke-width: 2
+      font-color: ${text}
+      border-radius: 6
+    }
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style: {
+      fill: ${surface}
+      stroke: ${muted}
+      font-color: ${text}
+    }
+  }
+  aws-service: {
+    shape: cloud
+    width: 130
+    height: 85
+    style: {
+      fill: ${surface}
+      stroke: ${accent}
+      font-color: ${text}
+    }
+  }
+  account-boundary: {
+    style: {
+      fill: ${primary}
+      stroke: ${secondary}
+      stroke-width: 2
+      font-color: ${text-light}
+      border-radius: 16
+      opacity: 0.95
+      bold: true
+    }
+  }
+  service-group: {
+    style: {
+      fill: ${surface}
+      stroke: ${secondary}
+      stroke-dash: 3
+      font-color: ${text}
+      border-radius: 8
+      opacity: 0.85
+      bold: true
+    }
+  }
+}
+
+# --- Actors ---
+gov_user: Government Operator {
+  class: actor
+}
+
+partner: Mission Partner {
+  class: actor
+}
+
+analyst: Intelligence Analyst {
+  class: actor
+}
+
+# --- Bluestaq Products ---
+bluestaq: Bluestaq {
+  class: account-boundary
+
+  udl: Unified Data Library {
+    class: service-group
+    style.fill: "#1C2F4A"
+  }
+
+  gdm: Global Data Marketplace {
+    class: service-group
+    style.fill: "#1C2F4A"
+  }
+
+  platform: Platform Services {
+    class: service-group
+    style.fill: "#1C2F4A"
+  }
+
+  analytics: Analytics Engine {
+    class: service-group
+    style.fill: "#1C2F4A"
+  }
+}
+
+# --- External Systems ---
+dod: DoD Data Sources {
+  class: external-node
+  shape: cloud
+}
+
+ic: IC Systems {
+  class: external-node
+  shape: cloud
+}
+
+aws_gov: AWS GovCloud {
+  class: aws-service
+}
+
+# --- Connections ---
+gov_user -> bluestaq.udl: discovers data { class: sync-connection }
+partner -> bluestaq.gdm: marketplace { class: sync-connection }
+analyst -> bluestaq.analytics: queries { class: sync-connection }
+dod -> bluestaq.udl: ingests { class: data-flow }
+ic -> bluestaq.udl: classified feeds { class: data-flow }
+bluestaq.udl -> bluestaq.gdm: published data { class: data-flow }
+bluestaq.udl -> bluestaq.analytics: indexed data { class: data-flow }
+bluestaq.platform -> aws_gov: hosted on { class: monitoring-link }

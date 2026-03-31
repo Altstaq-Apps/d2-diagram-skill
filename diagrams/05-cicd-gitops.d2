@@ -1,0 +1,488 @@
+# LEVEL: L2
+# AUDIENCE: DevOps engineers, platform leads
+# COMPLIANCE: none
+# Shows: CI/CD GitOps pipeline from GitHub through security scanning to multi-environment EKS deployment via ArgoCD
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary:    "#162646"
+  secondary:  "#385FAF"
+  accent:     "#9CADD7"
+  surface:    "#1C2F4A"
+  text:       "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted:      "#739BCF"
+  orange:     "#F5871F"
+  success:    "#4CAF80"
+  warning:    "#F5871F"
+  danger:     "#E24B4A"
+}
+
+classes: {
+  sync-connection: {
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+  }
+  async-connection: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.stroke-dash: 5
+    style.animated: true
+  }
+  critical-path: {
+    style.stroke: "${orange}"
+    style.stroke-width: 3
+  }
+  internal-service: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.shadow: true
+    style.font-color: "${text}"
+  }
+  external-node: {
+    style.fill: "${surface}"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  microservice: {
+    shape: hexagon
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    style.shadow: true
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+    label.near: outside-bottom-center
+  }
+  queue: {
+    shape: queue
+    width: 120
+    height: 70
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  aws-service: {
+    shape: cloud
+    width: 130
+    height: 85
+    style.fill: "${surface}"
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  account-boundary: {
+    style.fill: "${primary}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 3
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text-light}"
+  }
+  vpc-container: {
+    style.fill: "#0E1829"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text}"
+  }
+  service-group: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+    style.opacity: 0.85
+    style.font-color: "${text}"
+  }
+  security-boundary: {
+    style.fill: "transparent"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 6
+    style.bold: true
+    style.font-color: "${orange}"
+  }
+  data-flow: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.animated: true
+  }
+  monitoring-link: {
+    style.stroke: "#494C4D"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+  }
+  replication: {
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.animated: true
+  }
+  boundary-crossing: {
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 2
+  }
+}
+
+# --- Actors ---
+
+developer: Developer {
+  class: actor
+}
+
+reviewer: Reviewer {
+  class: actor
+}
+
+# --- Source Control ---
+
+github: GitHub {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  app-repo: Application Repo {
+    class: internal-service
+    icon: https://icons.terrastruct.com/dev%2Fgithub.svg
+  }
+
+  infra-repo: Infrastructure Repo {
+    class: internal-service
+    icon: https://icons.terrastruct.com/dev%2Fgithub.svg
+  }
+
+  gitops-repo: GitOps Manifests {
+    class: internal-service
+    icon: https://icons.terrastruct.com/dev%2Fgithub.svg
+  }
+}
+
+# --- CI Pipeline ---
+
+ci: CI Pipeline (GitHub Actions) {
+  class: account-boundary
+  label.near: outside-top-center
+
+  build: Build Stage {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    checkout: Checkout {
+      class: internal-service
+    }
+
+    deps: Install Deps {
+      class: internal-service
+    }
+
+    compile: Build/Compile {
+      class: internal-service
+    }
+
+    unit-test: Unit Tests {
+      class: internal-service
+    }
+  }
+
+  security: Security Scanning {
+    class: security-boundary
+    label.near: outside-top-center
+    direction: right
+
+    sast: SAST Scan {
+      class: internal-service
+      style.stroke: "${danger}"
+    }
+
+    sca: Dependency Scan {
+      class: internal-service
+      style.stroke: "${danger}"
+    }
+
+    secrets: Secret Detection {
+      class: internal-service
+      style.stroke: "${danger}"
+    }
+
+    container-scan: Container Scan {
+      class: internal-service
+      style.stroke: "${danger}"
+    }
+  }
+
+  integration: Integration Stage {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    int-test: Integration Tests {
+      class: internal-service
+    }
+
+    e2e: E2E Tests {
+      class: internal-service
+    }
+
+    perf: Performance Tests {
+      class: internal-service
+    }
+  }
+
+  publish: Publish Stage {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    docker-build: Docker Build {
+      class: internal-service
+      icon: https://icons.terrastruct.com/dev%2Fdocker.svg
+    }
+
+    ecr-push: Push to ECR {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAmazon-Elastic-Container-Service.svg
+    }
+
+    helm-pkg: Helm Package {
+      class: internal-service
+    }
+
+    manifest-update: Update Manifests {
+      class: internal-service
+    }
+  }
+}
+
+# --- Artifact Storage ---
+
+artifacts: Artifact Storage {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  ecr: ECR Registry {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FCompute%2FAmazon-Elastic-Container-Service.svg
+  }
+
+  helm-repo: Helm Charts (S3) {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  }
+
+  sbom: SBOM Store {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  }
+}
+
+# --- GitOps Controller ---
+
+argocd: ArgoCD {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  app-controller: Application Controller {
+    class: internal-service
+    style.fill: "${primary}"
+    style.font-color: "${text-light}"
+  }
+
+  repo-server: Repo Server {
+    class: internal-service
+  }
+
+  notif-ctrl: Notification Controller {
+    class: internal-service
+  }
+
+  image-updater: Image Updater {
+    class: internal-service
+  }
+}
+
+# --- Environments ---
+
+environments: Deployment Environments {
+  class: account-boundary
+  label.near: outside-top-center
+
+  dev: Dev EKS {
+    class: vpc-container
+    label.near: outside-top-center
+    direction: right
+
+    dev-ns: dev namespace {
+      class: service-group
+      label.near: outside-top-center
+      direction: right
+
+      dev-pods: App Pods {
+        class: internal-service
+        icon: https://icons.terrastruct.com/azure%2F_Companies%2FKubernetes.svg
+      }
+
+      dev-db: Dev DB {
+        class: datastore
+        icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg
+      }
+    }
+  }
+
+  staging: Staging EKS {
+    class: vpc-container
+    label.near: outside-top-center
+    direction: right
+
+    staging-ns: staging namespace {
+      class: service-group
+      label.near: outside-top-center
+      direction: right
+
+      staging-pods: App Pods {
+        class: internal-service
+        icon: https://icons.terrastruct.com/azure%2F_Companies%2FKubernetes.svg
+      }
+
+      staging-db: Staging DB {
+        class: datastore
+        icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg
+      }
+    }
+  }
+
+  prod: Production EKS {
+    class: vpc-container
+    label.near: outside-top-center
+    direction: right
+
+    prod-ns: production namespace {
+      class: service-group
+      label.near: outside-top-center
+      direction: right
+
+      prod-pods: App Pods {
+        class: internal-service
+        icon: https://icons.terrastruct.com/azure%2F_Companies%2FKubernetes.svg
+        style.multiple: true
+      }
+
+      prod-db: Prod Aurora {
+        class: datastore
+        icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg
+      }
+
+      prod-cache: ElastiCache {
+        class: datastore
+        icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-ElastiCache.svg
+      }
+    }
+  }
+}
+
+# --- Observability ---
+
+obs: Observability {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  datadog: Monitoring {
+    class: internal-service
+  }
+
+  pagerduty: PagerDuty {
+    class: external-node
+  }
+
+  slack: Slack Alerts {
+    class: external-node
+  }
+}
+
+# --- Connections: Developer Flow ---
+developer -> github.app-repo: pushes code {class: sync-connection}
+developer -> github.infra-repo: infra changes {class: sync-connection}
+reviewer -> github.app-repo: reviews PR {class: sync-connection}
+
+# --- Connections: CI Trigger ---
+github.app-repo -> ci.build.checkout: webhook triggers {class: async-connection}
+
+# --- Connections: CI Pipeline Stages ---
+ci.build.checkout -> ci.build.deps: installs {class: sync-connection}
+ci.build.deps -> ci.build.compile: compiles {class: sync-connection}
+ci.build.compile -> ci.build.unit-test: runs tests {class: sync-connection}
+
+ci.build.unit-test -> ci.security.sast: scans code {class: sync-connection}
+ci.security.sast -> ci.security.sca: scans deps {class: sync-connection}
+ci.security.sca -> ci.security.secrets: checks secrets {class: sync-connection}
+
+ci.security.secrets -> ci.integration.int-test: passes gates {class: sync-connection}
+ci.integration.int-test -> ci.integration.e2e: end-to-end {class: sync-connection}
+ci.integration.e2e -> ci.integration.perf: benchmarks {class: sync-connection}
+
+ci.integration.perf -> ci.publish.docker-build: builds image {class: data-flow}
+ci.publish.docker-build -> ci.security.container-scan: scans image {class: critical-path}
+ci.security.container-scan -> ci.publish.ecr-push: if clean {class: sync-connection}
+ci.publish.docker-build -> ci.publish.helm-pkg: packages chart {class: sync-connection}
+ci.publish.ecr-push -> ci.publish.manifest-update: updates tag {class: data-flow}
+
+# --- Connections: Publish to Artifacts ---
+ci.publish.ecr-push -> artifacts.ecr: pushes image {class: data-flow}
+ci.publish.helm-pkg -> artifacts.helm-repo: stores chart {class: data-flow}
+ci.security.sca -> artifacts.sbom: generates SBOM {class: data-flow}
+
+# --- Connections: GitOps Manifest Update ---
+ci.publish.manifest-update -> github.gitops-repo: commits new tag {class: data-flow}
+
+# --- Connections: ArgoCD Sync ---
+github.gitops-repo -> argocd.repo-server: watches manifests {class: async-connection}
+argocd.repo-server -> argocd.app-controller: detects drift {class: sync-connection}
+argocd.image-updater -> artifacts.ecr: watches tags {class: async-connection}
+
+# --- Connections: ArgoCD to Environments ---
+argocd.app-controller -> environments.dev.dev-ns.dev-pods: syncs dev {class: data-flow}
+argocd.app-controller -> environments.staging.staging-ns.staging-pods: syncs staging {class: data-flow}
+argocd.app-controller -> environments.prod.prod-ns.prod-pods: syncs prod {class: data-flow}
+
+# --- Connections: Environment Internal ---
+environments.dev.dev-ns.dev-pods -> environments.dev.dev-ns.dev-db: queries {class: sync-connection}
+environments.staging.staging-ns.staging-pods -> environments.staging.staging-ns.staging-db: queries {class: sync-connection}
+environments.prod.prod-ns.prod-pods -> environments.prod.prod-ns.prod-db: queries {class: sync-connection}
+environments.prod.prod-ns.prod-pods -> environments.prod.prod-ns.prod-cache: caches {class: sync-connection}
+
+# --- Connections: Observability ---
+environments.prod.prod-ns.prod-pods -> obs.datadog: metrics/logs {class: monitoring-link}
+argocd.notif-ctrl -> obs.slack: deploy notifications {class: async-connection}
+obs.datadog -> obs.pagerduty: alerts {class: critical-path}

@@ -1,0 +1,536 @@
+# LEVEL: L2
+# AUDIENCE: Data engineers, analytics leads
+# COMPLIANCE: none
+# Shows: Real-time analytics pipeline from IoT/API sources through streaming processing to dashboards and data lake
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary:    "#162646"
+  secondary:  "#385FAF"
+  accent:     "#9CADD7"
+  surface:    "#1C2F4A"
+  text:       "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted:      "#739BCF"
+  orange:     "#F5871F"
+  success:    "#4CAF80"
+  warning:    "#F5871F"
+  danger:     "#E24B4A"
+}
+
+classes: {
+  sync-connection: {
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+  }
+  async-connection: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.stroke-dash: 5
+    style.animated: true
+  }
+  critical-path: {
+    style.stroke: "${orange}"
+    style.stroke-width: 3
+  }
+  internal-service: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.shadow: true
+    style.font-color: "${text}"
+  }
+  external-node: {
+    style.fill: "${surface}"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  microservice: {
+    shape: hexagon
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    style.shadow: true
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+    label.near: outside-bottom-center
+  }
+  queue: {
+    shape: queue
+    width: 120
+    height: 70
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  aws-service: {
+    shape: cloud
+    width: 130
+    height: 85
+    style.fill: "${surface}"
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  account-boundary: {
+    style.fill: "${primary}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 3
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text-light}"
+  }
+  vpc-container: {
+    style.fill: "#0E1829"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text}"
+  }
+  service-group: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+    style.opacity: 0.85
+    style.font-color: "${text}"
+  }
+  security-boundary: {
+    style.fill: "transparent"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 6
+    style.bold: true
+    style.font-color: "${orange}"
+  }
+  data-flow: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.animated: true
+  }
+  monitoring-link: {
+    style.stroke: "#494C4D"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+  }
+  replication: {
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.animated: true
+  }
+  boundary-crossing: {
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 2
+  }
+}
+
+# --- Data Sources ---
+
+sources: Data Sources {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  iot-fleet: IoT Device Fleet {
+    class: external-node
+    style.multiple: true
+  }
+
+  clickstream: Clickstream SDK {
+    class: external-node
+  }
+
+  mobile-app: Mobile App {
+    class: external-node
+  }
+
+  partner-api: Partner APIs {
+    class: external-node
+  }
+
+  batch-sftp: Batch SFTP {
+    class: external-node
+  }
+}
+
+# --- Consumers ---
+
+analysts: Business Analysts {
+  class: actor
+}
+
+data-sci: Data Scientists {
+  class: actor
+}
+
+ops: Operations Team {
+  class: actor
+}
+
+# --- Ingestion Tier ---
+
+ingestion: Ingestion Tier {
+  class: account-boundary
+  label.near: outside-top-center
+
+  realtime: Real-Time Ingestion {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    iot-core: IoT Core {
+      class: internal-service
+    }
+
+    kinesis: Kinesis Data Streams {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Kinesis.svg
+    }
+
+    api-gw: API Gateway {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-API-Gateway.svg
+    }
+
+    firehose: Kinesis Firehose {
+      class: internal-service
+    }
+  }
+
+  batch: Batch Ingestion {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    transfer: AWS Transfer {
+      class: internal-service
+    }
+
+    glue-crawler: Glue Crawler {
+      class: internal-service
+    }
+
+    step-fn: Step Functions {
+      class: internal-service
+    }
+  }
+}
+
+# --- Streaming Processing ---
+
+streaming: Stream Processing {
+  class: account-boundary
+  label.near: outside-top-center
+
+  kafka: Kafka Cluster (MSK) {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    broker-1: Broker 1 {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Managed-Streaming-for-Kafka.svg
+    }
+
+    broker-2: Broker 2 {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Managed-Streaming-for-Kafka.svg
+    }
+
+    broker-3: Broker 3 {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Managed-Streaming-for-Kafka.svg
+    }
+
+    schema-reg: Schema Registry {
+      class: internal-service
+    }
+  }
+
+  processors: Stream Processors {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    flink: Apache Flink {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAmazon-EC2.svg
+    }
+
+    enrichment: Enrichment Lambda {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+
+    anomaly: Anomaly Detection {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+
+    agg: Aggregation Service {
+      class: internal-service
+    }
+  }
+
+  cep: Complex Event Processing {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    rules: Rules Engine {
+      class: internal-service
+    }
+
+    alerts: Alert Generator {
+      class: internal-service
+      style.stroke: "${danger}"
+    }
+
+    dedup: Deduplication {
+      class: internal-service
+    }
+  }
+}
+
+# --- Storage Layer ---
+
+storage: Data Lake (S3) {
+  class: account-boundary
+  label.near: outside-top-center
+
+  landing: Landing Zone {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  }
+
+  raw: Raw Zone {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  }
+
+  curated: Curated Zone {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  }
+
+  catalog: Glue Data Catalog {
+    class: internal-service
+  }
+
+  athena: Athena {
+    class: internal-service
+  }
+}
+
+# --- Serving Layer ---
+
+serving: Serving Layer {
+  class: account-boundary
+  label.near: outside-top-center
+
+  hot: Hot Store {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    opensearch: OpenSearch {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Kinesis.svg
+    }
+
+    redis: ElastiCache Redis {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-ElastiCache.svg
+    }
+
+    dynamo: DynamoDB {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-DynamoDB.svg
+    }
+  }
+
+  warm: Warm Store {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    redshift: Redshift {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg
+    }
+
+    rds: Aurora PostgreSQL {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg
+    }
+  }
+
+  apis: Serving APIs {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    graphql: GraphQL API {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-API-Gateway.svg
+    }
+
+    rest: REST API {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-API-Gateway.svg
+    }
+
+    ws: WebSocket API {
+      class: internal-service
+    }
+  }
+}
+
+# --- Visualization ---
+
+viz: Visualization & Reporting {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  quicksight: QuickSight {
+    class: internal-service
+  }
+
+  grafana: Grafana {
+    class: internal-service
+  }
+
+  jupyter: Jupyter Hub {
+    class: internal-service
+  }
+
+  custom-dash: Custom Dashboard {
+    class: internal-service
+  }
+}
+
+# --- Alerting ---
+
+alerting: Alerting {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  sns: SNS Topics {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Notification-Service-SNS.svg
+  }
+
+  cloudwatch: CloudWatch Alarms {
+    class: internal-service
+  }
+
+  pagerduty: PagerDuty {
+    class: external-node
+  }
+}
+
+# --- Connections: Sources to Ingestion ---
+sources.iot-fleet -> ingestion.realtime.iot-core: MQTT telemetry {class: async-connection}
+sources.clickstream -> ingestion.realtime.kinesis: streams events {class: async-connection}
+sources.mobile-app -> ingestion.realtime.api-gw: REST events {class: sync-connection}
+sources.partner-api -> ingestion.realtime.api-gw: webhook data {class: boundary-crossing}
+sources.batch-sftp -> ingestion.batch.transfer: daily uploads {class: data-flow}
+
+# --- Connections: Ingestion Internal ---
+ingestion.realtime.iot-core -> ingestion.realtime.kinesis: routes messages {class: data-flow}
+ingestion.realtime.api-gw -> ingestion.realtime.kinesis: forwards events {class: data-flow}
+ingestion.realtime.kinesis -> ingestion.realtime.firehose: buffers {class: data-flow}
+ingestion.realtime.firehose -> storage.landing: micro-batches {class: data-flow}
+ingestion.batch.transfer -> storage.landing: raw files {class: data-flow}
+ingestion.batch.glue-crawler -> storage.catalog: registers schemas {class: sync-connection}
+ingestion.batch.step-fn -> ingestion.batch.glue-crawler: orchestrates {class: sync-connection}
+
+# --- Connections: Ingestion to Streaming ---
+ingestion.realtime.kinesis -> streaming.kafka.broker-1: publishes topics {class: data-flow}
+
+# --- Connections: Kafka Internal ---
+streaming.kafka.broker-1 -> streaming.kafka.broker-2: replicates {class: replication}
+streaming.kafka.broker-2 -> streaming.kafka.broker-3: replicates {class: replication}
+
+# --- Connections: Kafka to Processors ---
+streaming.kafka.broker-1 -> streaming.processors.flink: consumes streams {class: data-flow}
+streaming.kafka.broker-2 -> streaming.processors.enrichment: enriches events {class: data-flow}
+streaming.kafka.broker-3 -> streaming.processors.anomaly: detects anomalies {class: data-flow}
+streaming.processors.flink -> streaming.processors.agg: aggregates windows {class: sync-connection}
+
+# --- Connections: CEP ---
+streaming.processors.anomaly -> streaming.cep.rules: evaluates rules {class: sync-connection}
+streaming.cep.rules -> streaming.cep.alerts: triggers {class: critical-path}
+streaming.cep.dedup -> streaming.processors.enrichment: deduped events {class: sync-connection}
+streaming.processors.enrichment -> streaming.cep.dedup: raw events {class: data-flow}
+
+# --- Connections: Processors to Storage ---
+streaming.processors.flink -> storage.raw: writes parquet {class: data-flow}
+streaming.processors.agg -> storage.curated: writes aggregates {class: data-flow}
+storage.raw -> storage.curated: ETL transforms {class: data-flow}
+storage.curated -> storage.catalog: updates catalog {class: sync-connection}
+
+# --- Connections: Processors to Serving ---
+streaming.processors.flink -> serving.hot.opensearch: indexes real-time {class: data-flow}
+streaming.processors.agg -> serving.hot.redis: caches aggregates {class: data-flow}
+streaming.processors.enrichment -> serving.hot.dynamo: writes enriched {class: data-flow}
+
+# --- Connections: Storage to Serving ---
+storage.curated -> serving.warm.redshift: loads warehouse {class: replication}
+storage.athena -> storage.curated: queries {class: sync-connection}
+storage.curated -> serving.warm.rds: materializes views {class: replication}
+
+# --- Connections: Serving to APIs ---
+serving.hot.opensearch -> serving.apis.rest: search API {class: sync-connection}
+serving.hot.redis -> serving.apis.graphql: cached queries {class: sync-connection}
+serving.hot.dynamo -> serving.apis.ws: pushes updates {class: async-connection}
+serving.warm.redshift -> serving.apis.graphql: analytics queries {class: sync-connection}
+
+# --- Connections: APIs to Viz ---
+serving.apis.graphql -> viz.custom-dash: serves data {class: sync-connection}
+serving.apis.ws -> viz.custom-dash: live updates {class: async-connection}
+serving.warm.redshift -> viz.quicksight: direct query {class: sync-connection}
+serving.hot.opensearch -> viz.grafana: log dashboards {class: sync-connection}
+storage.athena -> viz.jupyter: ad-hoc analysis {class: sync-connection}
+
+# --- Connections: Alerting ---
+streaming.cep.alerts -> alerting.sns: publishes alerts {class: critical-path}
+alerting.cloudwatch -> alerting.sns: threshold breaches {class: critical-path}
+alerting.sns -> alerting.pagerduty: pages on-call {class: boundary-crossing}
+
+# --- Connections: Users ---
+analysts -> viz.quicksight: views dashboards {class: sync-connection}
+data-sci -> viz.jupyter: runs notebooks {class: sync-connection}
+ops -> viz.grafana: monitors systems {class: sync-connection}
+ops -> alerting.pagerduty: responds to alerts {class: sync-connection}

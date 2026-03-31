@@ -1,0 +1,377 @@
+# LEVEL: L3
+# AUDIENCE: Cloud architects, DevOps leads
+# COMPLIANCE: FedRAMP High
+# Shows: AWS multi-account landing zone with Control Tower, Transit Gateway, centralized logging, and SSO
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary:    "#162646"
+  secondary:  "#385FAF"
+  accent:     "#9CADD7"
+  surface:    "#1C2F4A"
+  text:       "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted:      "#739BCF"
+  orange:     "#F5871F"
+  success:    "#4CAF80"
+  warning:    "#F5871F"
+  danger:     "#E24B4A"
+}
+
+classes: {
+  sync-connection: {
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+  }
+  async-connection: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.stroke-dash: 5
+    style.animated: true
+  }
+  critical-path: {
+    style.stroke: "${orange}"
+    style.stroke-width: 3
+  }
+  internal-service: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.shadow: true
+    style.font-color: "${text}"
+  }
+  external-node: {
+    style.fill: "${surface}"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  microservice: {
+    shape: hexagon
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    style.shadow: true
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+    label.near: outside-bottom-center
+  }
+  queue: {
+    shape: queue
+    width: 120
+    height: 70
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  aws-service: {
+    shape: cloud
+    width: 130
+    height: 85
+    style.fill: "${surface}"
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  account-boundary: {
+    style.fill: "${primary}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 3
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text-light}"
+  }
+  vpc-container: {
+    style.fill: "#0E1829"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text}"
+  }
+  service-group: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+    style.opacity: 0.85
+    style.font-color: "${text}"
+  }
+  security-boundary: {
+    style.fill: "transparent"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 6
+    style.bold: true
+    style.font-color: "${orange}"
+  }
+  data-flow: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.animated: true
+  }
+  monitoring-link: {
+    style.stroke: "#494C4D"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+  }
+  replication: {
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.animated: true
+  }
+  boundary-crossing: {
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 2
+  }
+}
+
+# --- Top-level actors ---
+
+admin: Cloud Admin {
+  class: actor
+}
+
+sso-users: SSO Users {
+  class: actor
+}
+
+# --- FedRAMP Boundary ---
+
+fedramp: FedRAMP High Boundary {
+  class: security-boundary
+  label.near: outside-top-center
+
+  # --- Management Account ---
+  mgmt: Management Account {
+    class: account-boundary
+    label.near: outside-top-center
+    direction: right
+
+    control-tower: Control Tower {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FManagement%20%26%20Governance%2FAWS-Control-Tower.svg
+    }
+
+    organizations: AWS Organizations {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FManagement%20%26%20Governance%2FAWS-Organizations.svg
+    }
+
+    sso: IAM Identity Center {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FSecurity%2C%20Identity%2C%20%26%20Compliance%2FAWS-Shield.svg
+    }
+
+    billing: Cost Explorer {
+      class: internal-service
+    }
+  }
+
+  # --- Security Account ---
+  security: Security Account {
+    class: account-boundary
+    label.near: outside-top-center
+    direction: right
+
+    guardduty: GuardDuty {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FSecurity%2C%20Identity%2C%20%26%20Compliance%2FAmazon-GuardDuty.svg
+    }
+
+    security-hub: Security Hub {
+      class: internal-service
+    }
+
+    cloudtrail: CloudTrail {
+      class: internal-service
+    }
+
+    config: AWS Config {
+      class: internal-service
+    }
+
+    audit-logs: Audit Logs {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+    }
+  }
+
+  # --- Shared Services Account ---
+  shared: Shared Services Account {
+    class: account-boundary
+    label.near: outside-top-center
+    direction: right
+
+    vpc-shared: Shared VPC {
+      class: vpc-container
+      label.near: outside-top-center
+      direction: right
+
+      transit-gw: Transit Gateway {
+        class: internal-service
+        icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-VPC.svg
+      }
+
+      dns: Route 53 Resolver {
+        class: internal-service
+      }
+
+      ad: Active Directory {
+        class: internal-service
+      }
+    }
+
+    ecr: ECR Registry {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAmazon-Elastic-Container-Service.svg
+    }
+
+    artifacts: Artifact Store {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+    }
+  }
+
+  # --- Workload Account (Prod) ---
+  workload-prod: Production Workload Account {
+    class: account-boundary
+    label.near: outside-top-center
+
+    vpc-prod: Production VPC {
+      class: vpc-container
+      label.near: outside-top-center
+      direction: right
+
+      pub-subnet: Public Subnet {
+        class: service-group
+        label.near: outside-top-center
+        direction: right
+
+        alb: ALB {
+          class: internal-service
+          icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FElastic-Load-Balancing.svg
+        }
+
+        nat: NAT Gateway {
+          class: internal-service
+        }
+      }
+
+      priv-subnet: Private Subnet {
+        class: service-group
+        label.near: outside-top-center
+        direction: right
+
+        eks: EKS Cluster {
+          class: internal-service
+          icon: https://icons.terrastruct.com/aws%2FCompute%2FAmazon-Elastic-Kubernetes-Service.svg
+        }
+
+        lambda: Lambda Functions {
+          class: internal-service
+          icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+        }
+      }
+
+      data-subnet: Data Subnet {
+        class: service-group
+        label.near: outside-top-center
+        direction: right
+
+        rds: Aurora PostgreSQL {
+          class: datastore
+          icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg
+        }
+
+        elasticache: ElastiCache {
+          class: datastore
+          icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-ElastiCache.svg
+        }
+      }
+    }
+  }
+
+  # --- Workload Account (Dev/Staging) ---
+  workload-dev: Dev/Staging Account {
+    class: account-boundary
+    label.near: outside-top-center
+
+    vpc-dev: Dev VPC {
+      class: vpc-container
+      label.near: outside-top-center
+      direction: right
+
+      eks-dev: EKS Dev {
+        class: internal-service
+        icon: https://icons.terrastruct.com/aws%2FCompute%2FAmazon-Elastic-Kubernetes-Service.svg
+      }
+
+      rds-dev: Aurora Dev {
+        class: datastore
+        icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg
+      }
+    }
+  }
+}
+
+# --- Connections: SSO & Admin ---
+admin -> fedramp.mgmt.control-tower: manages {class: sync-connection}
+sso-users -> fedramp.mgmt.sso: authenticates {class: sync-connection}
+
+# --- Connections: Management ---
+fedramp.mgmt.control-tower -> fedramp.mgmt.organizations: governs {class: sync-connection}
+fedramp.mgmt.organizations -> fedramp.security: policy enforcement {class: sync-connection}
+fedramp.mgmt.organizations -> fedramp.shared: policy enforcement {class: sync-connection}
+fedramp.mgmt.organizations -> fedramp.workload-prod: policy enforcement {class: sync-connection}
+fedramp.mgmt.organizations -> fedramp.workload-dev: policy enforcement {class: sync-connection}
+fedramp.mgmt.sso -> fedramp.workload-prod: role assumption {class: boundary-crossing}
+fedramp.mgmt.sso -> fedramp.workload-dev: role assumption {class: boundary-crossing}
+
+# --- Connections: Security Monitoring ---
+fedramp.workload-prod -> fedramp.security.guardduty: findings {class: async-connection}
+fedramp.workload-dev -> fedramp.security.guardduty: findings {class: async-connection}
+fedramp.security.guardduty -> fedramp.security.security-hub: aggregates {class: data-flow}
+fedramp.security.config -> fedramp.security.security-hub: compliance {class: data-flow}
+fedramp.security.cloudtrail -> fedramp.security.audit-logs: stores {class: data-flow}
+
+# --- Connections: Transit Gateway ---
+fedramp.shared.vpc-shared.transit-gw -> fedramp.workload-prod.vpc-prod: peering {class: sync-connection}
+fedramp.shared.vpc-shared.transit-gw -> fedramp.workload-dev.vpc-dev: peering {class: sync-connection}
+
+# --- Connections: Shared Services ---
+fedramp.shared.ecr -> fedramp.workload-prod.vpc-prod.priv-subnet.eks: images {class: data-flow}
+fedramp.shared.ecr -> fedramp.workload-dev.vpc-dev.eks-dev: images {class: data-flow}
+
+# --- Connections: Workload Internal ---
+fedramp.workload-prod.vpc-prod.pub-subnet.alb -> fedramp.workload-prod.vpc-prod.priv-subnet.eks: HTTPS:443 {class: sync-connection}
+fedramp.workload-prod.vpc-prod.priv-subnet.eks -> fedramp.workload-prod.vpc-prod.data-subnet.rds: TCP:5432 {class: sync-connection}
+fedramp.workload-prod.vpc-prod.priv-subnet.eks -> fedramp.workload-prod.vpc-prod.data-subnet.elasticache: TCP:6379 {class: sync-connection}
+fedramp.workload-prod.vpc-prod.priv-subnet.lambda -> fedramp.workload-prod.vpc-prod.data-subnet.rds: TCP:5432 {class: sync-connection}

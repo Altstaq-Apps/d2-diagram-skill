@@ -1,0 +1,423 @@
+# LEVEL: L2
+# AUDIENCE: Engineering leads, backend architects
+# COMPLIANCE: none
+# Shows: Serverless event-driven architecture with Lambda, Step Functions, SQS/SNS, and DynamoDB
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary:    "#162646"
+  secondary:  "#385FAF"
+  accent:     "#9CADD7"
+  surface:    "#1C2F4A"
+  text:       "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted:      "#739BCF"
+  orange:     "#F5871F"
+  success:    "#4CAF80"
+  warning:    "#F5871F"
+  danger:     "#E24B4A"
+}
+
+classes: {
+  sync-connection: {
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+  }
+  async-connection: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.stroke-dash: 5
+    style.animated: true
+  }
+  critical-path: {
+    style.stroke: "${orange}"
+    style.stroke-width: 3
+  }
+  internal-service: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.shadow: true
+    style.font-color: "${text}"
+  }
+  external-node: {
+    style.fill: "${surface}"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  microservice: {
+    shape: hexagon
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    style.shadow: true
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+    label.near: outside-bottom-center
+  }
+  queue: {
+    shape: queue
+    width: 120
+    height: 70
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  aws-service: {
+    shape: cloud
+    width: 130
+    height: 85
+    style.fill: "${surface}"
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  account-boundary: {
+    style.fill: "${primary}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 3
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text-light}"
+  }
+  vpc-container: {
+    style.fill: "#0E1829"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text}"
+  }
+  service-group: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+    style.opacity: 0.85
+    style.font-color: "${text}"
+  }
+  security-boundary: {
+    style.fill: "transparent"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 6
+    style.bold: true
+    style.font-color: "${orange}"
+  }
+  data-flow: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.animated: true
+  }
+  monitoring-link: {
+    style.stroke: "#494C4D"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+  }
+  replication: {
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.animated: true
+  }
+  boundary-crossing: {
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 2
+  }
+}
+
+# --- External ---
+
+client: Web Client {
+  class: actor
+}
+
+webhook-src: Webhook Sources {
+  class: external-node
+}
+
+scheduler: CloudWatch Scheduler {
+  class: internal-service
+}
+
+# --- API Layer ---
+
+api: API Layer {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  apigw: API Gateway {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-API-Gateway.svg
+  }
+
+  cognito: Cognito {
+    class: internal-service
+  }
+
+  cloudfront: CloudFront {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-CloudFront.svg
+  }
+}
+
+# --- Event Router ---
+
+eventbridge: EventBridge {
+  class: internal-service
+  style.stroke: "${accent}"
+  style.stroke-width: 3
+  style.fill: "${primary}"
+  style.font-color: "${text-light}"
+}
+
+# --- Lambda Functions ---
+
+functions: Lambda Functions {
+  class: account-boundary
+  label.near: outside-top-center
+
+  sync-handlers: Synchronous Handlers {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    auth-fn: Auth Handler {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+
+    crud-fn: CRUD Handler {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+
+    query-fn: Query Handler {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+
+    websocket-fn: WebSocket Handler {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+  }
+
+  async-handlers: Asynchronous Handlers {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    order-proc: Order Processor {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+
+    image-proc: Image Processor {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+
+    email-fn: Email Sender {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+
+    audit-fn: Audit Logger {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+  }
+
+  step-fn: Step Functions {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    order-workflow: Order Workflow {
+      class: internal-service
+      style.fill: "${primary}"
+      style.font-color: "${text-light}"
+    }
+
+    onboarding-wf: Onboarding Flow {
+      class: internal-service
+      style.fill: "${primary}"
+      style.font-color: "${text-light}"
+    }
+
+    data-pipeline: Data Pipeline {
+      class: internal-service
+      style.fill: "${primary}"
+      style.font-color: "${text-light}"
+    }
+  }
+}
+
+# --- Messaging ---
+
+messaging: Messaging Layer {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  order-queue: Order Queue {
+    class: queue
+    icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Queue-Service-SQS.svg
+  }
+
+  image-queue: Image Queue {
+    class: queue
+    icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Queue-Service-SQS.svg
+  }
+
+  dlq: Dead Letter Queue {
+    class: queue
+    icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Queue-Service-SQS.svg
+    style.stroke: "${danger}"
+  }
+
+  notif-topic: Notification Topic {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Notification-Service-SNS.svg
+  }
+
+  audit-topic: Audit Topic {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Notification-Service-SNS.svg
+  }
+}
+
+# --- Data Stores ---
+
+stores: Data Stores {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  dynamo-main: Main Table {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-DynamoDB.svg
+  }
+
+  dynamo-sessions: Sessions Table {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-DynamoDB.svg
+  }
+
+  s3-uploads: Upload Bucket {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  }
+
+  s3-processed: Processed Bucket {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  }
+
+  elasticache: ElastiCache {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-ElastiCache.svg
+  }
+}
+
+# --- Monitoring ---
+
+monitoring: Monitoring {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  cloudwatch: CloudWatch {
+    class: internal-service
+  }
+
+  xray: X-Ray Tracing {
+    class: internal-service
+  }
+
+  alarm-sns: Alarm Topic {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Notification-Service-SNS.svg
+  }
+}
+
+# --- Connections: Client to API ---
+client -> api.cloudfront: HTTPS {class: sync-connection}
+api.cloudfront -> api.apigw: routes {class: sync-connection}
+api.apigw -> api.cognito: validates JWT {class: sync-connection}
+webhook-src -> api.apigw: webhook events {class: boundary-crossing}
+
+# --- Connections: API to Functions ---
+api.apigw -> functions.sync-handlers.auth-fn: auth requests {class: sync-connection}
+api.apigw -> functions.sync-handlers.crud-fn: CRUD ops {class: sync-connection}
+api.apigw -> functions.sync-handlers.query-fn: read queries {class: sync-connection}
+api.apigw -> functions.sync-handlers.websocket-fn: WS connections {class: sync-connection}
+
+# --- Connections: EventBridge ---
+api.apigw -> eventbridge: publishes events {class: async-connection}
+webhook-src -> eventbridge: external events {class: async-connection}
+scheduler -> eventbridge: cron triggers {class: async-connection}
+
+eventbridge -> messaging.order-queue: order events {class: async-connection}
+eventbridge -> messaging.notif-topic: notifications {class: async-connection}
+eventbridge -> messaging.audit-topic: audit events {class: async-connection}
+eventbridge -> functions.step-fn.order-workflow: orchestrates {class: async-connection}
+eventbridge -> functions.step-fn.data-pipeline: scheduled ETL {class: async-connection}
+
+# --- Connections: Queues to Lambdas ---
+messaging.order-queue -> functions.async-handlers.order-proc: triggers {class: async-connection}
+messaging.image-queue -> functions.async-handlers.image-proc: triggers {class: async-connection}
+messaging.notif-topic -> functions.async-handlers.email-fn: fan-out {class: async-connection}
+messaging.audit-topic -> functions.async-handlers.audit-fn: fan-out {class: async-connection}
+messaging.order-queue -> messaging.dlq: failed messages {class: critical-path}
+
+# --- Connections: Step Functions ---
+functions.step-fn.order-workflow -> functions.async-handlers.order-proc: step 1 {class: sync-connection}
+functions.step-fn.order-workflow -> messaging.notif-topic: step 2 notify {class: async-connection}
+functions.step-fn.onboarding-wf -> functions.sync-handlers.crud-fn: creates user {class: sync-connection}
+
+# --- Connections: Functions to Data ---
+functions.sync-handlers.crud-fn -> stores.dynamo-main: read/write {class: sync-connection}
+functions.sync-handlers.auth-fn -> stores.dynamo-sessions: sessions {class: sync-connection}
+functions.sync-handlers.query-fn -> stores.elasticache: cached reads {class: sync-connection}
+functions.async-handlers.order-proc -> stores.dynamo-main: updates {class: sync-connection}
+functions.async-handlers.image-proc -> stores.s3-uploads: reads raw {class: data-flow}
+functions.async-handlers.image-proc -> stores.s3-processed: writes resized {class: data-flow}
+
+# --- Connections: S3 Events ---
+stores.s3-uploads -> messaging.image-queue: S3 event trigger {class: async-connection}
+
+# --- Connections: Monitoring ---
+functions.sync-handlers.crud-fn -> monitoring.xray: traces {class: monitoring-link}
+functions.async-handlers.order-proc -> monitoring.xray: traces {class: monitoring-link}
+functions.step-fn.order-workflow -> monitoring.cloudwatch: logs {class: monitoring-link}
+monitoring.cloudwatch -> monitoring.alarm-sns: alerts {class: critical-path}

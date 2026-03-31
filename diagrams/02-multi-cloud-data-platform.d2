@@ -1,0 +1,399 @@
+# LEVEL: L2
+# AUDIENCE: Engineering leads, data architects
+# COMPLIANCE: none
+# Shows: Multi-cloud data platform spanning AWS and GCP with streaming, batch, and analytics layers
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary:    "#162646"
+  secondary:  "#385FAF"
+  accent:     "#9CADD7"
+  surface:    "#1C2F4A"
+  text:       "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted:      "#739BCF"
+  orange:     "#F5871F"
+  success:    "#4CAF80"
+  warning:    "#F5871F"
+  danger:     "#E24B4A"
+}
+
+classes: {
+  sync-connection: {
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+  }
+  async-connection: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.stroke-dash: 5
+    style.animated: true
+  }
+  critical-path: {
+    style.stroke: "${orange}"
+    style.stroke-width: 3
+  }
+  internal-service: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.shadow: true
+    style.font-color: "${text}"
+  }
+  external-node: {
+    style.fill: "${surface}"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  microservice: {
+    shape: hexagon
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    style.shadow: true
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+    label.near: outside-bottom-center
+  }
+  queue: {
+    shape: queue
+    width: 120
+    height: 70
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  aws-service: {
+    shape: cloud
+    width: 130
+    height: 85
+    style.fill: "${surface}"
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  account-boundary: {
+    style.fill: "${primary}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 3
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text-light}"
+  }
+  vpc-container: {
+    style.fill: "#0E1829"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text}"
+  }
+  service-group: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+    style.opacity: 0.85
+    style.font-color: "${text}"
+  }
+  security-boundary: {
+    style.fill: "transparent"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 6
+    style.bold: true
+    style.font-color: "${orange}"
+  }
+  data-flow: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.animated: true
+  }
+  monitoring-link: {
+    style.stroke: "#494C4D"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+  }
+  replication: {
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.animated: true
+  }
+  boundary-crossing: {
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 2
+  }
+}
+
+# --- External Data Sources ---
+
+sources: Data Sources {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  iot: IoT Devices {
+    class: external-node
+  }
+
+  saas: SaaS APIs {
+    class: external-node
+  }
+
+  mobile: Mobile Apps {
+    class: external-node
+  }
+
+  batch-files: Batch Files {
+    class: external-node
+  }
+}
+
+analysts: Data Analysts {
+  class: actor
+}
+
+ml-engineers: ML Engineers {
+  class: actor
+}
+
+# --- AWS Cloud ---
+
+aws: AWS (us-east-1) {
+  class: account-boundary
+  label.near: outside-top-center
+
+  ingestion: Ingestion Layer {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    api-gw: API Gateway {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-API-Gateway.svg
+    }
+
+    kinesis: Kinesis Streams {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Kinesis.svg
+    }
+
+    firehose: Kinesis Firehose {
+      class: internal-service
+    }
+  }
+
+  streaming: Streaming Layer {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    msk: Amazon MSK (Kafka) {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Managed-Streaming-for-Kafka.svg
+    }
+
+    schema-reg: Schema Registry {
+      class: internal-service
+    }
+
+    connect: Kafka Connect {
+      class: internal-service
+    }
+  }
+
+  processing: Processing Layer {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    emr: EMR Spark {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAmazon-EC2.svg
+    }
+
+    glue: Glue ETL {
+      class: internal-service
+    }
+
+    lambda: Lambda Transform {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+  }
+
+  storage: Data Lake {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    raw: Raw Zone (S3) {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+    }
+
+    curated: Curated Zone (S3) {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+    }
+
+    catalog: Glue Catalog {
+      class: internal-service
+    }
+  }
+
+  operational: Operational Store {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    dynamo: DynamoDB {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-DynamoDB.svg
+    }
+
+    elasticache: ElastiCache Redis {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-ElastiCache.svg
+    }
+
+    opensearch: OpenSearch {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Kinesis.svg
+    }
+  }
+}
+
+# --- GCP Cloud ---
+
+gcp: GCP (us-central1) {
+  class: account-boundary
+  label.near: outside-top-center
+
+  analytics: Analytics Layer {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    bigquery: BigQuery {
+      class: internal-service
+      icon: https://icons.terrastruct.com/gcp%2FProducts%20and%20services%2FData%20Analytics%2FBigQuery.svg
+    }
+
+    dataflow: Dataflow (Beam) {
+      class: internal-service
+    }
+
+    pubsub: Cloud Pub/Sub {
+      class: internal-service
+      icon: https://icons.terrastruct.com/gcp%2FProducts%20and%20services%2FData%20Analytics%2FCloud%20PubSub.svg
+    }
+  }
+
+  ml: ML Platform {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    vertex: Vertex AI {
+      class: internal-service
+    }
+
+    notebooks: AI Notebooks {
+      class: internal-service
+    }
+
+    model-store: Model Registry (GCS) {
+      class: datastore
+      icon: https://icons.terrastruct.com/gcp%2FProducts%20and%20services%2FStorage%2FCloud%20Storage.svg
+    }
+  }
+
+  viz: Visualization {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    looker: Looker {
+      class: internal-service
+    }
+
+    datastudio: Data Studio {
+      class: internal-service
+    }
+  }
+}
+
+# --- Cross-cloud interconnect ---
+
+interconnect: Cloud Interconnect {
+  class: internal-service
+  style.stroke: "${orange}"
+}
+
+# --- Connections: Ingestion ---
+sources.iot -> aws.ingestion.kinesis: streams telemetry {class: async-connection}
+sources.saas -> aws.ingestion.api-gw: REST webhooks {class: sync-connection}
+sources.mobile -> aws.ingestion.api-gw: events {class: sync-connection}
+sources.batch-files -> aws.storage.raw: bulk upload {class: data-flow}
+
+# --- Connections: AWS Internal ---
+aws.ingestion.api-gw -> aws.ingestion.kinesis: forwards {class: data-flow}
+aws.ingestion.kinesis -> aws.streaming.msk: ingests {class: data-flow}
+aws.ingestion.firehose -> aws.storage.raw: buffers to S3 {class: data-flow}
+aws.streaming.msk -> aws.processing.emr: batch reads {class: async-connection}
+aws.streaming.msk -> aws.processing.lambda: real-time triggers {class: async-connection}
+aws.processing.emr -> aws.storage.curated: writes parquet {class: data-flow}
+aws.processing.glue -> aws.storage.curated: ETL output {class: data-flow}
+aws.processing.glue -> aws.storage.catalog: registers tables {class: sync-connection}
+aws.processing.lambda -> aws.operational.dynamo: writes state {class: sync-connection}
+aws.processing.lambda -> aws.operational.elasticache: caches {class: sync-connection}
+aws.storage.curated -> aws.operational.opensearch: indexes {class: data-flow}
+
+# --- Connections: Cross-cloud ---
+aws.storage.curated -> interconnect: replicates curated data {class: replication}
+interconnect -> gcp.analytics.bigquery: loads to BigQuery {class: replication}
+aws.streaming.msk -> interconnect: mirrors topics {class: replication}
+interconnect -> gcp.analytics.pubsub: publishes events {class: replication}
+
+# --- Connections: GCP Internal ---
+gcp.analytics.pubsub -> gcp.analytics.dataflow: processes streams {class: data-flow}
+gcp.analytics.dataflow -> gcp.analytics.bigquery: writes results {class: data-flow}
+gcp.analytics.bigquery -> gcp.ml.vertex: training data {class: data-flow}
+gcp.ml.vertex -> gcp.ml.model-store: stores models {class: sync-connection}
+gcp.ml.notebooks -> gcp.analytics.bigquery: queries {class: sync-connection}
+gcp.analytics.bigquery -> gcp.viz.looker: serves dashboards {class: sync-connection}
+gcp.analytics.bigquery -> gcp.viz.datastudio: serves reports {class: sync-connection}
+
+# --- Connections: Users ---
+analysts -> gcp.viz.looker: views dashboards {class: sync-connection}
+analysts -> aws.operational.opensearch: searches logs {class: sync-connection}
+ml-engineers -> gcp.ml.notebooks: develops models {class: sync-connection}

@@ -1,0 +1,368 @@
+# LEVEL: L2
+# AUDIENCE: Engineering leads, platform engineers
+# COMPLIANCE: none
+# Shows: Kubernetes microservices platform on EKS with service mesh, observability, and data stores
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary:    "#162646"
+  secondary:  "#385FAF"
+  accent:     "#9CADD7"
+  surface:    "#1C2F4A"
+  text:       "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted:      "#739BCF"
+  orange:     "#F5871F"
+  success:    "#4CAF80"
+  warning:    "#F5871F"
+  danger:     "#E24B4A"
+}
+
+classes: {
+  sync-connection: {
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+  }
+  async-connection: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.stroke-dash: 5
+    style.animated: true
+  }
+  critical-path: {
+    style.stroke: "${orange}"
+    style.stroke-width: 3
+  }
+  internal-service: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.shadow: true
+    style.font-color: "${text}"
+  }
+  external-node: {
+    style.fill: "${surface}"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  microservice: {
+    shape: hexagon
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    style.shadow: true
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+    label.near: outside-bottom-center
+  }
+  queue: {
+    shape: queue
+    width: 120
+    height: 70
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  aws-service: {
+    shape: cloud
+    width: 130
+    height: 85
+    style.fill: "${surface}"
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  account-boundary: {
+    style.fill: "${primary}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 3
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text-light}"
+  }
+  vpc-container: {
+    style.fill: "#0E1829"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text}"
+  }
+  service-group: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+    style.opacity: 0.85
+    style.font-color: "${text}"
+  }
+  security-boundary: {
+    style.fill: "transparent"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 6
+    style.bold: true
+    style.font-color: "${orange}"
+  }
+  data-flow: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.animated: true
+  }
+  monitoring-link: {
+    style.stroke: "#494C4D"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+  }
+  replication: {
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.animated: true
+  }
+  boundary-crossing: {
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 2
+  }
+}
+
+# --- External ---
+
+users: End Users {
+  class: actor
+}
+
+mobile: Mobile Clients {
+  class: external-node
+}
+
+third-party: Third-Party APIs {
+  class: external-node
+}
+
+# --- Edge Layer ---
+
+edge: Edge Layer {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  cloudfront: CloudFront CDN {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-CloudFront.svg
+  }
+
+  waf: AWS WAF {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FSecurity%2C%20Identity%2C%20%26%20Compliance%2FAWS-Shield.svg
+  }
+
+  api-gw: API Gateway {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-API-Gateway.svg
+  }
+}
+
+# --- EKS Cluster ---
+
+eks: EKS Cluster {
+  class: account-boundary
+  label.near: outside-top-center
+  icon: https://icons.terrastruct.com/aws%2FCompute%2FAmazon-Elastic-Kubernetes-Service.svg
+
+  # --- Ingress ---
+  ingress: Ingress Layer {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    nginx: NGINX Ingress {
+      class: internal-service
+      icon: https://icons.terrastruct.com/dev%2Fnginx.svg
+    }
+
+    envoy: Istio Envoy {
+      class: internal-service
+    }
+  }
+
+  # --- Core Microservices ---
+  core: Core Services {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    user-svc: User Service {
+      class: microservice
+    }
+
+    auth-svc: Auth Service {
+      class: microservice
+    }
+
+    order-svc: Order Service {
+      class: microservice
+    }
+
+    product-svc: Product Service {
+      class: microservice
+    }
+
+    payment-svc: Payment Service {
+      class: microservice
+    }
+
+    notification-svc: Notification {
+      class: microservice
+    }
+  }
+
+  # --- Async Messaging ---
+  messaging: Event Bus {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    sqs-orders: Order Queue {
+      class: queue
+      icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Queue-Service-SQS.svg
+    }
+
+    sqs-notif: Notification Queue {
+      class: queue
+      icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Queue-Service-SQS.svg
+    }
+
+    sns-events: Event Topic {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Notification-Service-SNS.svg
+    }
+  }
+
+  # --- Observability ---
+  observability: Observability Stack {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    prometheus: Prometheus {
+      class: internal-service
+    }
+
+    grafana: Grafana {
+      class: internal-service
+    }
+
+    jaeger: Jaeger Tracing {
+      class: internal-service
+    }
+
+    fluentbit: Fluent Bit {
+      class: internal-service
+    }
+  }
+}
+
+# --- Data Layer ---
+
+data: Data Layer {
+  class: service-group
+  label.near: outside-top-center
+  direction: right
+
+  postgres-users: Users DB {
+    class: datastore
+    icon: https://icons.terrastruct.com/dev%2Fpostgresql.svg
+  }
+
+  postgres-orders: Orders DB {
+    class: datastore
+    icon: https://icons.terrastruct.com/dev%2Fpostgresql.svg
+  }
+
+  mongo-products: Products DB {
+    class: datastore
+    icon: https://icons.terrastruct.com/dev%2Fmongodb.svg
+  }
+
+  redis: Redis Cache {
+    class: datastore
+    icon: https://icons.terrastruct.com/dev%2Fredis.svg
+  }
+
+  s3: S3 Assets {
+    class: datastore
+    icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+  }
+
+  opensearch: OpenSearch Logs {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Kinesis.svg
+  }
+}
+
+# --- Connections: External to Edge ---
+users -> edge.cloudfront: HTTPS {class: sync-connection}
+mobile -> edge.api-gw: REST/gRPC {class: sync-connection}
+edge.cloudfront -> edge.waf: filters {class: sync-connection}
+edge.waf -> edge.api-gw: forwards {class: sync-connection}
+
+# --- Connections: Edge to Cluster ---
+edge.api-gw -> eks.ingress.nginx: routes requests {class: sync-connection}
+eks.ingress.nginx -> eks.ingress.envoy: mTLS sidecar {class: sync-connection}
+
+# --- Connections: Ingress to Services ---
+eks.ingress.envoy -> eks.core.auth-svc: authenticates {class: sync-connection}
+eks.ingress.envoy -> eks.core.user-svc: user ops {class: sync-connection}
+eks.ingress.envoy -> eks.core.order-svc: order ops {class: sync-connection}
+eks.ingress.envoy -> eks.core.product-svc: product ops {class: sync-connection}
+
+# --- Connections: Service-to-Service ---
+eks.core.order-svc -> eks.core.payment-svc: processes payment {class: sync-connection}
+eks.core.order-svc -> eks.messaging.sqs-orders: queues order events {class: async-connection}
+eks.core.order-svc -> eks.messaging.sns-events: publishes events {class: async-connection}
+eks.messaging.sns-events -> eks.messaging.sqs-notif: fans out {class: async-connection}
+eks.messaging.sqs-notif -> eks.core.notification-svc: triggers {class: async-connection}
+eks.core.payment-svc -> third-party: payment gateway {class: boundary-crossing}
+
+# --- Connections: Services to Data ---
+eks.core.user-svc -> data.postgres-users: queries {class: sync-connection}
+eks.core.auth-svc -> data.redis: session cache {class: sync-connection}
+eks.core.order-svc -> data.postgres-orders: persists {class: sync-connection}
+eks.core.product-svc -> data.mongo-products: queries {class: sync-connection}
+eks.core.product-svc -> data.redis: caches catalog {class: sync-connection}
+eks.core.product-svc -> data.s3: serves images {class: sync-connection}
+
+# --- Connections: Observability ---
+eks.core.user-svc -> eks.observability.prometheus: metrics {class: monitoring-link}
+eks.core.order-svc -> eks.observability.prometheus: metrics {class: monitoring-link}
+eks.core.payment-svc -> eks.observability.jaeger: traces {class: monitoring-link}
+eks.observability.prometheus -> eks.observability.grafana: dashboards {class: sync-connection}
+eks.observability.fluentbit -> data.opensearch: ships logs {class: data-flow}

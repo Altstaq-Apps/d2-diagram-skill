@@ -1,0 +1,523 @@
+# LEVEL: L3
+# AUDIENCE: Security architects, compliance officers
+# COMPLIANCE: FedRAMP High / IL5
+# Shows: Zero-trust security architecture with defense-in-depth, IAM, WAF, Shield, VPN, and security monitoring
+
+direction: right
+
+vars: {
+  d2-config: {
+    sketch: true
+    theme-id: 200
+    layout-engine: elk
+  }
+  primary:    "#162646"
+  secondary:  "#385FAF"
+  accent:     "#9CADD7"
+  surface:    "#1C2F4A"
+  text:       "#D6D6DA"
+  text-light: "#FFFFFF"
+  muted:      "#739BCF"
+  orange:     "#F5871F"
+  success:    "#4CAF80"
+  warning:    "#F5871F"
+  danger:     "#E24B4A"
+}
+
+classes: {
+  sync-connection: {
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+  }
+  async-connection: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.stroke-dash: 5
+    style.animated: true
+  }
+  critical-path: {
+    style.stroke: "${orange}"
+    style.stroke-width: 3
+  }
+  internal-service: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.shadow: true
+    style.font-color: "${text}"
+  }
+  external-node: {
+    style.fill: "${surface}"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  microservice: {
+    shape: hexagon
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  datastore: {
+    shape: cylinder
+    width: 160
+    height: 130
+    style.shadow: true
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+    label.near: outside-bottom-center
+  }
+  queue: {
+    shape: queue
+    width: 120
+    height: 70
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  actor: {
+    shape: person
+    width: 100
+    height: 80
+    style.fill: "${surface}"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  aws-service: {
+    shape: cloud
+    width: 130
+    height: 85
+    style.fill: "${surface}"
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.font-color: "${text}"
+  }
+  account-boundary: {
+    style.fill: "${primary}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 3
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text-light}"
+  }
+  vpc-container: {
+    style.fill: "#0E1829"
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.bold: true
+    style.opacity: 1
+    style.font-color: "${text}"
+  }
+  service-group: {
+    style.fill: "${surface}"
+    style.stroke: "${secondary}"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+    style.opacity: 0.85
+    style.font-color: "${text}"
+  }
+  security-boundary: {
+    style.fill: "transparent"
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 6
+    style.bold: true
+    style.font-color: "${orange}"
+  }
+  data-flow: {
+    style.stroke: "${accent}"
+    style.stroke-width: 2
+    style.animated: true
+  }
+  monitoring-link: {
+    style.stroke: "#494C4D"
+    style.stroke-width: 1
+    style.stroke-dash: 3
+  }
+  replication: {
+    style.stroke: "${muted}"
+    style.stroke-width: 2
+    style.stroke-dash: 4
+    style.animated: true
+  }
+  boundary-crossing: {
+    style.stroke: "${orange}"
+    style.stroke-width: 2
+    style.stroke-dash: 2
+  }
+}
+
+# --- External Actors ---
+
+internet-user: Public User {
+  class: actor
+}
+
+remote-employee: Remote Employee {
+  class: actor
+}
+
+admin: Security Admin {
+  class: actor
+}
+
+attacker: Threat Actor {
+  class: actor
+  style.stroke: "${danger}"
+  style.font-color: "${danger}"
+}
+
+# --- Identity Layer ---
+
+identity: Identity & Access {
+  class: security-boundary
+  label.near: outside-top-center
+
+  sso: IAM Identity Center {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FSecurity%2C%20Identity%2C%20%26%20Compliance%2FAWS-Shield.svg
+  }
+
+  cognito: Cognito User Pool {
+    class: internal-service
+  }
+
+  mfa: MFA Enforcement {
+    class: internal-service
+    style.stroke: "${success}"
+  }
+
+  iam-roles: IAM Roles {
+    class: internal-service
+  }
+
+  policy-engine: Permission Boundaries {
+    class: internal-service
+  }
+
+  secrets: Secrets Manager {
+    class: internal-service
+  }
+
+  cert-mgr: ACM Certificates {
+    class: internal-service
+  }
+}
+
+# --- Edge Security ---
+
+edge-security: Edge Security Layer {
+  class: security-boundary
+  label.near: outside-top-center
+
+  route53: Route 53 (DNSSEC) {
+    class: internal-service
+  }
+
+  shield: AWS Shield Advanced {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FSecurity%2C%20Identity%2C%20%26%20Compliance%2FAWS-Shield.svg
+  }
+
+  cloudfront: CloudFront {
+    class: internal-service
+    icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-CloudFront.svg
+  }
+
+  waf: AWS WAF {
+    class: internal-service
+    style.stroke: "${danger}"
+  }
+
+  firewall-mgr: Firewall Manager {
+    class: internal-service
+  }
+}
+
+# --- Network Security ---
+
+fedramp: FedRAMP High Boundary {
+  class: security-boundary
+  label.near: outside-top-center
+
+  network: Network Security {
+    class: account-boundary
+    label.near: outside-top-center
+
+    vpc: Production VPC {
+      class: vpc-container
+      label.near: outside-top-center
+
+      # --- DMZ ---
+      dmz: DMZ Subnet {
+        class: service-group
+        label.near: outside-top-center
+        direction: right
+
+        alb: ALB (TLS) {
+          class: internal-service
+          icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FElastic-Load-Balancing.svg
+        }
+
+        vpn-endpoint: Client VPN {
+          class: internal-service
+          icon: https://icons.terrastruct.com/aws%2FNetworking%20%26%20Content%20Delivery%2FAmazon-VPC.svg
+        }
+
+        nat: NAT Gateway {
+          class: internal-service
+        }
+      }
+
+      # --- App Tier ---
+      app-tier: Application Subnet {
+        class: service-group
+        label.near: outside-top-center
+        direction: right
+
+        eks: EKS Cluster {
+          class: internal-service
+          icon: https://icons.terrastruct.com/aws%2FCompute%2FAmazon-Elastic-Kubernetes-Service.svg
+        }
+
+        lambda: Lambda (VPC) {
+          class: internal-service
+          icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+        }
+
+        service-mesh: Istio Service Mesh {
+          class: internal-service
+          style.stroke: "${success}"
+        }
+      }
+
+      # --- Data Tier ---
+      data-tier: Data Subnet {
+        class: service-group
+        label.near: outside-top-center
+        direction: right
+
+        rds: Aurora (Encrypted) {
+          class: datastore
+          icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-RDS.svg
+        }
+
+        dynamo: DynamoDB (Encrypted) {
+          class: datastore
+          icon: https://icons.terrastruct.com/aws%2FDatabase%2FAmazon-DynamoDB.svg
+        }
+
+        s3: S3 (SSE-KMS) {
+          class: datastore
+          icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+        }
+
+        kms: KMS Keys {
+          class: internal-service
+        }
+      }
+
+      # --- Security Groups ---
+      sg-alb: SG: ALB {
+        class: internal-service
+        style.stroke: "${success}"
+        style.stroke-dash: 3
+      }
+
+      sg-app: SG: Application {
+        class: internal-service
+        style.stroke: "${success}"
+        style.stroke-dash: 3
+      }
+
+      sg-data: SG: Database {
+        class: internal-service
+        style.stroke: "${success}"
+        style.stroke-dash: 3
+      }
+    }
+
+    vpc-endpoints: VPC Endpoints {
+      class: service-group
+      label.near: outside-top-center
+      direction: right
+
+      s3-ep: S3 Gateway EP {
+        class: internal-service
+      }
+
+      sts-ep: STS Interface EP {
+        class: internal-service
+      }
+
+      secrets-ep: Secrets Mgr EP {
+        class: internal-service
+      }
+
+      ecr-ep: ECR Interface EP {
+        class: internal-service
+      }
+    }
+  }
+}
+
+# --- Security Monitoring ---
+
+monitoring: Security Operations Center {
+  class: account-boundary
+  label.near: outside-top-center
+
+  detection: Threat Detection {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    guardduty: GuardDuty {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FSecurity%2C%20Identity%2C%20%26%20Compliance%2FAmazon-GuardDuty.svg
+    }
+
+    inspector: Inspector {
+      class: internal-service
+    }
+
+    macie: Macie (PII) {
+      class: internal-service
+    }
+  }
+
+  compliance: Compliance {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    config: AWS Config {
+      class: internal-service
+    }
+
+    audit-mgr: Audit Manager {
+      class: internal-service
+    }
+
+    security-hub: Security Hub {
+      class: internal-service
+    }
+  }
+
+  logging: Centralized Logging {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    cloudtrail: CloudTrail {
+      class: internal-service
+    }
+
+    vpc-flow: VPC Flow Logs {
+      class: internal-service
+    }
+
+    log-bucket: Log Archive (S3) {
+      class: datastore
+      icon: https://icons.terrastruct.com/aws%2FStorage%2FAmazon-Simple-Storage-Service-S3.svg
+    }
+
+    opensearch: OpenSearch SIEM {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FAnalytics%2FAmazon-Kinesis.svg
+    }
+  }
+
+  response: Incident Response {
+    class: service-group
+    label.near: outside-top-center
+    direction: right
+
+    eventbridge: EventBridge {
+      class: internal-service
+    }
+
+    lambda-resp: Response Lambda {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FCompute%2FAWS-Lambda.svg
+    }
+
+    sns-alerts: Alert Topic {
+      class: internal-service
+      icon: https://icons.terrastruct.com/aws%2FApplication%20Integration%2FAmazon-Simple-Notification-Service-SNS.svg
+    }
+  }
+}
+
+# --- Connections: External Access ---
+internet-user -> edge-security.route53: DNS lookup {class: sync-connection}
+edge-security.route53 -> edge-security.cloudfront: resolves {class: sync-connection}
+internet-user -> edge-security.cloudfront: HTTPS requests {class: boundary-crossing}
+attacker -> edge-security.shield: DDoS attempt {class: critical-path}
+edge-security.shield -> edge-security.waf: filters traffic {class: sync-connection}
+edge-security.cloudfront -> edge-security.waf: inspects requests {class: sync-connection}
+edge-security.waf -> fedramp.network.vpc.dmz.alb: allowed traffic {class: boundary-crossing}
+
+# --- Connections: VPN Access ---
+remote-employee -> identity.sso: authenticates {class: boundary-crossing}
+identity.sso -> identity.mfa: enforces MFA {class: sync-connection}
+identity.mfa -> identity.iam-roles: assumes role {class: sync-connection}
+remote-employee -> fedramp.network.vpc.dmz.vpn-endpoint: VPN tunnel {class: boundary-crossing}
+fedramp.network.vpc.dmz.vpn-endpoint -> fedramp.network.vpc.app-tier.eks: private access {class: sync-connection}
+
+# --- Connections: Admin ---
+admin -> identity.sso: privileged access {class: boundary-crossing}
+admin -> monitoring.compliance.security-hub: reviews posture {class: sync-connection}
+
+# --- Connections: Identity to Services ---
+identity.iam-roles -> identity.policy-engine: evaluates boundaries {class: sync-connection}
+identity.secrets -> fedramp.network.vpc.app-tier.eks: injects secrets {class: sync-connection}
+identity.cert-mgr -> fedramp.network.vpc.dmz.alb: TLS certs {class: sync-connection}
+
+# --- Connections: Network Internal ---
+fedramp.network.vpc.dmz.alb -> fedramp.network.vpc.sg-alb: enforces rules {class: sync-connection}
+fedramp.network.vpc.sg-alb -> fedramp.network.vpc.app-tier.eks: HTTPS:443 {class: sync-connection}
+fedramp.network.vpc.app-tier.eks -> fedramp.network.vpc.app-tier.service-mesh: mTLS sidecar {class: sync-connection}
+fedramp.network.vpc.app-tier.eks -> fedramp.network.vpc.sg-app: enforces rules {class: sync-connection}
+fedramp.network.vpc.sg-app -> fedramp.network.vpc.data-tier.rds: TCP:5432 {class: sync-connection}
+fedramp.network.vpc.sg-app -> fedramp.network.vpc.data-tier.dynamo: HTTPS:443 {class: sync-connection}
+fedramp.network.vpc.sg-app -> fedramp.network.vpc.sg-data: enforces rules {class: sync-connection}
+fedramp.network.vpc.data-tier.kms -> fedramp.network.vpc.data-tier.rds: encrypts {class: sync-connection}
+fedramp.network.vpc.data-tier.kms -> fedramp.network.vpc.data-tier.dynamo: encrypts {class: sync-connection}
+fedramp.network.vpc.data-tier.kms -> fedramp.network.vpc.data-tier.s3: encrypts {class: sync-connection}
+
+# --- Connections: VPC Endpoints ---
+fedramp.network.vpc.app-tier.eks -> fedramp.network.vpc-endpoints.s3-ep: S3 access {class: sync-connection}
+fedramp.network.vpc.app-tier.eks -> fedramp.network.vpc-endpoints.sts-ep: STS calls {class: sync-connection}
+fedramp.network.vpc.app-tier.eks -> fedramp.network.vpc-endpoints.secrets-ep: secret retrieval {class: sync-connection}
+fedramp.network.vpc.app-tier.eks -> fedramp.network.vpc-endpoints.ecr-ep: pulls images {class: sync-connection}
+
+# --- Connections: Security Monitoring ---
+fedramp.network.vpc -> monitoring.detection.guardduty: VPC findings {class: async-connection}
+fedramp.network.vpc.data-tier.s3 -> monitoring.detection.macie: scans PII {class: async-connection}
+fedramp.network.vpc.app-tier.eks -> monitoring.detection.inspector: vulnerability scan {class: async-connection}
+
+# --- Connections: Compliance ---
+monitoring.detection.guardduty -> monitoring.compliance.security-hub: findings {class: data-flow}
+monitoring.detection.inspector -> monitoring.compliance.security-hub: findings {class: data-flow}
+monitoring.detection.macie -> monitoring.compliance.security-hub: findings {class: data-flow}
+monitoring.compliance.config -> monitoring.compliance.security-hub: compliance status {class: data-flow}
+monitoring.compliance.config -> monitoring.compliance.audit-mgr: evidence {class: data-flow}
+
+# --- Connections: Logging ---
+fedramp.network.vpc -> monitoring.logging.vpc-flow: flow logs {class: monitoring-link}
+monitoring.logging.cloudtrail -> monitoring.logging.log-bucket: archives {class: data-flow}
+monitoring.logging.vpc-flow -> monitoring.logging.log-bucket: archives {class: data-flow}
+monitoring.logging.log-bucket -> monitoring.logging.opensearch: indexes {class: data-flow}
+
+# --- Connections: Incident Response ---
+monitoring.compliance.security-hub -> monitoring.response.eventbridge: critical findings {class: critical-path}
+monitoring.response.eventbridge -> monitoring.response.lambda-resp: auto-remediate {class: async-connection}
+monitoring.response.eventbridge -> monitoring.response.sns-alerts: notifies SOC {class: critical-path}
+monitoring.response.lambda-resp -> fedramp.network.vpc.sg-app: isolates resource {class: critical-path}
